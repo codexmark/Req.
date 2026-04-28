@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Req. Codex</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="global-nav">
+      <div class="global-nav__brand">
+        <span class="brand-mark small">F</span>
+        <div>
+          <span class="global-nav__title">Req. Codex - Framework de Análise e Registro de Objetivos</span>
+          <span class="global-nav__subtitle">Sistema de elicitação e consolidação de requisitos para sessões com rastreabilidade, validação e artefatos formais.</span>
+        </div>
+      </div>
+      <nav class="global-nav__links" aria-label="Navegação principal">
+        <a href="#workspace">Workspace</a>
+        <a href="#requirements">Requisitos</a>
+        <a href="#artifacts">Artefatos</a>
+      </nav>
+    </header>
+
+    <div id="workspace" class="app-shell">
+      <aside class="sidebar">
+        <span id="autosave-indicator" class="autosave-badge">Auto-save</span>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Requirements Studio</p>
+            <h2>Workspace de descoberta e consolidação</h2>
+          </div>
+          <div class="topbar-actions">
+            <button id="reset-session-top" class="button danger-light">Limpar sessão</button>
+            <button id="meeting-mode-toggle" class="button ghost">Modo foco</button>
+          </div>
+        </header>
+
+        <section class="surface-card configuration-card">
+          <div class="section-title-row">
+            <div>
+              <p class="eyebrow">Configuração</p>
+              <h2>Contexto da sessão</h2>
+            </div>
+          </div>
+
+          <form id="project-form" class="form-grid form-grid-wide">
+            <label>
+              Projeto
+              <input name="projectName" placeholder="Ex.: Implantação de portal comercial" />
+            </label>
+            <label>
+              Cliente / área
+              <input name="client" placeholder="Ex.: Operações Comerciais" />
+            </label>
+            <label>
+              Domínio
+              <input name="domain" placeholder="Ex.: CRM, Financeiro, RH" />
+            </label>
+            <label>
+              Objetivo principal
+              <input name="primaryGoal" placeholder="Resultado principal esperado" />
+            </label>
+            <label>
+              Facilitador
+              <input name="facilitator" placeholder="Nome do analista ou responsável" />
+            </label>
+            <label>
+              Data da sessão
+              <input name="sessionDate" type="date" />
+            </label>
+            <label>
+              Tipo de reunião
+              <input name="meetingType" placeholder="Kickoff, descoberta, refinamento..." />
+            </label>
+            <label class="full-span">
+              Problema de negócio
+              <textarea
+                name="businessProblem"
+                rows="3"
+                placeholder="Dor principal, impacto atual e urgência do cenário."
+              ></textarea>
+            </label>
+            <label class="full-span">
+              Critério de sucesso
+              <textarea
+                name="successMetric"
+                rows="2"
+                placeholder="KPI, SLA, redução de erros, tempo, custo ou meta de adoção."
+              ></textarea>
+            </label>
+          </form>
+        </section>
+
+        <section class="surface-card script-card">
+          <div class="script-card__header">
+            <h3>Roteiro</h3>
+            <div class="script-card__status">
+              <span class="metric-mini">
+                <span class="metric-mini__label">Cobertura</span>
+                <strong id="session-progress">0/10</strong>
+              </span>
+              <span class="metric-mini">
+                <span class="metric-mini__label">Requisitos</span>
+                <strong id="requirement-count">0</strong>
+              </span>
+              <span class="metric-mini">
+                <span class="metric-mini__label">Lacunas</span>
+                <strong id="gap-count">0</strong>
+              </span>
+              <span id="current-block-pill" class="pill subtle">Contexto</span>
+            </div>
+          </div>
+          <nav id="block-nav" class="script-card__nav"></nav>
+        </section>
+
+        <section class="workspace-grid">
+          <div class="workspace-column">
+
+            <section class="surface-card interview-card">
+              <div class="section-title-row">
+                <div>
+                  <p class="eyebrow">Entrevista guiada</p>
+                  <h2 id="interview-title">Contexto do negócio</h2>
+                </div>
+                <div class="interview-toolbar">
+                  <span id="current-question-progress" class="pill subtle">Pergunta 1/3</span>
+                  <button id="next-block" class="button secondary">Próximo bloco</button>
+                </div>
+              </div>
+
+              <p id="interview-purpose" class="section-copy"></p>
+
+              <div class="prompt-panel">
+                <article class="prompt-card primary">
+                  <span class="mini-label">Pergunta em foco</span>
+                  <p id="current-question" class="question-card"></p>
+                </article>
+                <article class="prompt-card">
+                  <span class="mini-label">Próximas investigações úteis</span>
+                  <ul id="adaptive-questions" class="adaptive-list"></ul>
+                </article>
+              </div>
+
+              <label class="full-span">
+                Registro da fala
+                <textarea
+                  id="answer-input"
+                  rows="5"
+                  placeholder="Capture a resposta do stakeholder em linguagem fiel, sem resumir prematuramente."
+                ></textarea>
+              </label>
+
+              <div class="action-row">
+                <button id="save-answer" class="button primary">Salvar resposta</button>
+                <button id="derive-requirement" class="button secondary">Gerar requisito</button>
+                <button id="next-question" class="button ghost">Avançar pergunta</button>
+              </div>
+
+              <div class="notes-grid">
+                <section class="subpanel">
+                  <div class="section-title-row">
+                    <h3>Histórico do bloco</h3>
+                    <span id="answer-count" class="pill subtle">0 respostas</span>
+                  </div>
+                  <ul id="answer-list" class="timeline-list"></ul>
+                </section>
+                <section class="subpanel">
+                  <div class="section-title-row">
+                    <h3>Lacunas abertas</h3>
+                    <span class="pill warning">dinâmico</span>
+                  </div>
+                  <ul id="gap-list" class="timeline-list"></ul>
+                </section>
+              </div>
+            </section>
+          </div>
+
+          <div class="workspace-column">
+            <section id="requirements" class="surface-card">
+              <div class="section-title-row">
+                <div>
+                  <p class="eyebrow">Consolidação</p>
+                  <h2>Requisitos atômicos</h2>
+                </div>
+                <button id="new-requirement" class="button ghost">Novo requisito</button>
+              </div>
+
+              <div class="requirements-layout">
+                <div class="subpanel">
+                  <ul id="requirement-list" class="requirement-list"></ul>
+                </div>
+                <form id="requirement-form" class="requirement-form">
+                  <label>
+                    ID
+                    <input name="id" readonly />
+                  </label>
+                  <label>
+                    Título curto
+                    <input name="title" placeholder="Formulação objetiva do requisito" />
+                  </label>
+                  <label class="full-span">
+                    Descrição
+                    <textarea
+                      name="description"
+                      rows="4"
+                      placeholder="Descrição clara, sem ambiguidade e sem misturar múltiplas exigências."
+                    ></textarea>
+                  </label>
+                  <label>
+                    Categoria
+                    <select name="category"></select>
+                  </label>
+                  <label>
+                    Prioridade
+                    <select name="priority">
+                      <option value="Must">Must</option>
+                      <option value="Should">Should</option>
+                      <option value="Could">Could</option>
+                      <option value="Won't">Won't</option>
+                    </select>
+                  </label>
+                  <label>
+                    Stakeholder fonte
+                    <input name="stakeholder" placeholder="Quem originou ou valida este requisito" />
+                  </label>
+                  <label>
+                    Origem
+                    <input name="source" placeholder="Sessão, norma, documento ou decisão" />
+                  </label>
+                  <label class="full-span">
+                    Racional
+                    <textarea name="rationale" rows="2" placeholder="Por que este requisito existe?"></textarea>
+                  </label>
+                  <label class="full-span">
+                    Critério de aceitação
+                    <textarea
+                      name="acceptanceCriteria"
+                      rows="3"
+                      placeholder="Comportamento observável que demonstra atendimento."
+                    ></textarea>
+                  </label>
+                  <label class="full-span">
+                    Fit criterion
+                    <textarea
+                      name="fitCriterion"
+                      rows="2"
+                      placeholder="Métrica objetiva: prazo, volume, precisão, disponibilidade..."
+                    ></textarea>
+                  </label>
+                  <label>
+                    Método de verificação
+                    <select name="verificationMethod">
+                      <option value="Teste">Teste</option>
+                      <option value="Inspeção">Inspeção</option>
+                      <option value="Análise">Análise</option>
+                      <option value="Demonstração">Demonstração</option>
+                    </select>
+                  </label>
+                  <label>
+                    Dependências
+                    <input name="dependencies" placeholder="IDs, integrações ou decisões prévias" />
+                  </label>
+                  <label>
+                    Riscos
+                    <input name="risks" placeholder="Hipóteses frágeis, dados incertos, impacto operacional" />
+                  </label>
+                  <label>
+                    Impactos
+                    <input name="impacts" placeholder="Segurança, integração, suporte, auditoria..." />
+                  </label>
+                  <label class="full-span">
+                    Exceções e observações
+                    <textarea name="notes" rows="3" placeholder="Exceções, proibições e pendências específicas."></textarea>
+                  </label>
+                  <div class="action-row full-span">
+                    <button id="save-requirement" class="button primary">Salvar</button>
+                    <button id="clone-requirement" class="button secondary">Duplicar</button>
+                    <button id="delete-requirement" class="button danger-light">Excluir</button>
+                  </div>
+                </form>
+              </div>
+            </section>
+
+            <section class="surface-card">
+              <div class="section-title-row">
+                <div>
+                  <p class="eyebrow">Qualidade</p>
+                  <h2>Validação do requisito</h2>
+                </div>
+                <span id="quality-score" class="pill success">0/5</span>
+              </div>
+              <ul id="quality-list" class="quality-list"></ul>
+            </section>
+
+            <section id="artifacts" class="surface-card">
+              <div class="section-title-row">
+                <div>
+                  <p class="eyebrow">Artefatos</p>
+                  <h2>Saídas executivas e formais</h2>
+                </div>
+                <span id="artifact-status" class="pill subtle">tempo real</span>
+              </div>
+
+              <div class="export-bar">
+                <button id="export-markdown" class="button secondary">Especificação</button>
+                <button id="export-backlog" class="button secondary">Backlog</button>
+                <button id="export-traceability" class="button ghost">Matriz</button>
+                <button id="export-minutes" class="button ghost">Ata</button>
+                <button id="export-json" class="button ghost">JSON</button>
+                <button id="reset-session" class="button danger-light">Limpar sessão</button>
+              </div>
+
+              <div class="artifact-tabs">
+                <button type="button" class="artifact-tab is-active" data-artifact-tab="backlog">
+                  Backlog
+                </button>
+                <button type="button" class="artifact-tab" data-artifact-tab="traceability">
+                  Rastreabilidade
+                </button>
+                <button type="button" class="artifact-tab" data-artifact-tab="minutes">
+                  Ata
+                </button>
+              </div>
+
+              <section id="artifact-backlog" class="artifact-panel is-active">
+                <div id="backlog-summary" class="artifact-summary"></div>
+                <ul id="backlog-list" class="artifact-list"></ul>
+              </section>
+
+              <section id="artifact-traceability" class="artifact-panel">
+                <div class="table-wrap">
+                  <table class="traceability-table">
+                    <thead>
+                      <tr>
+                        <th>Req</th>
+                        <th>Categoria</th>
+                        <th>Fonte</th>
+                        <th>Objetivo / problema</th>
+                        <th>Verificação</th>
+                      </tr>
+                    </thead>
+                    <tbody id="traceability-body"></tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section id="artifact-minutes" class="artifact-panel">
+                <div id="minutes-preview" class="minutes-preview"></div>
+              </section>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="global-footer">
+      <div class="global-footer__content">
+        <span class="global-footer__brand">Req. Codex</span>
+        <span class="global-footer__separator">•</span>
+        <span class="global-footer__credit">Mark R. Mesquita</span>
+        <span class="global-footer__separator">•</span>
+        <span class="global-footer__handle">codexmark</span>
+      </div>
+    </footer>
+
+    <div id="progress-toast" class="progress-toast" role="status" aria-live="polite">
+      <span class="progress-toast__icon">📌</span>
+      <span id="progress-toast__message" class="progress-toast__message"></span>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
