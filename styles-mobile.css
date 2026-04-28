@@ -1,0 +1,447 @@
+/* ====================================================
+   MOBILE LAYOUT — Req. Codex
+   Detecta automaticamente telas < 640px e aplica
+   layout mobile-first com bottom navigation e UX touch
+   ==================================================== */
+
+/* ── DETECÇÃO E VARIÁVEIS MOBILE ─────────────────── */
+:root {
+  --mobile-nav-height: 64px;
+  --mobile-header-height: 54px;
+  --mobile-panel-radius: 20px;
+  --touch-target: 48px;
+  --slide-duration: 280ms;
+  --slide-easing: cubic-bezier(0.32, 0, 0.67, 0);
+}
+
+/* ── BOTTOM NAVIGATION (só mobile) ─────────────────── */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 639px) {
+
+  /* ── RESET ESTRUTURAL ─────────────────── */
+  html {
+    overscroll-behavior: none;
+  }
+
+  body {
+    padding-bottom: var(--mobile-nav-height);
+  }
+
+  /* ── GLOBAL NAV → HEADER MOBILE ─────────────────── */
+  .global-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--mobile-header-height);
+    padding: 10px 14px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    z-index: 100;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Oculta links de nav no header — ficam na bottom nav */
+  .global-nav__links {
+    display: none;
+  }
+
+  .global-nav__title {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 64vw;
+  }
+
+  .global-nav__subtitle {
+    display: none;
+  }
+
+  .global-nav__brand {
+    gap: 8px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  /* ── BOTTOM NAVIGATION ─────────────────── */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--mobile-nav-height);
+    z-index: 100;
+    background: rgba(8, 13, 24, 0.90);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+    align-items: stretch;
+  }
+
+  .mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: rgba(148, 163, 184, 0.55);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 180ms ease, background 180ms ease;
+    -webkit-tap-highlight-color: transparent;
+    min-height: var(--touch-target);
+  }
+
+  .mobile-nav-item svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 180ms ease, transform 180ms ease;
+  }
+
+  .mobile-nav-item.is-active {
+    color: var(--accent);
+  }
+
+  .mobile-nav-item.is-active svg {
+    transform: translateY(-1px);
+  }
+
+  .mobile-nav-item:active {
+    background: rgba(55, 183, 165, 0.08);
+  }
+
+  .mobile-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #05111d;
+    font-size: 0.52rem;
+    font-weight: 800;
+    position: absolute;
+    top: 6px;
+    right: calc(50% - 18px);
+  }
+
+  /* ── APP SHELL MOBILE ─────────────────── */
+  .app-shell {
+    padding: calc(var(--mobile-header-height) + 12px) 12px 20px;
+    min-height: 100dvh;
+    max-width: 100%;
+    width: 100%;
+    display: block;
+  }
+
+  /* ── SISTEMA DE ABAS MOBILE (views) ─────────────────── */
+  .mobile-view {
+    display: none;
+  }
+
+  .mobile-view.is-active {
+    display: block;
+    animation: mobileSlideIn var(--slide-duration) var(--slide-easing) both;
+  }
+
+  @keyframes mobileSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-view.is-active {
+      animation: none;
+    }
+  }
+
+  /* ── SURFACE CARDS MOBILE ─────────────────── */
+  .surface-card {
+    padding: 16px;
+    border-radius: var(--mobile-panel-radius);
+    margin-bottom: 14px;
+  }
+
+  /* ── TOPBAR MOBILE ─────────────────── */
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 0 0 4px;
+  }
+
+  .topbar h2 {
+    font-size: 1.05rem;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-left: 0;
+  }
+
+  .topbar-actions .button {
+    width: 100%;
+    font-size: 0.78rem;
+    padding: 10px 8px;
+  }
+
+  /* ── SESSION FORM MOBILE ─────────────────── */
+  .form-grid,
+  .form-grid-wide,
+  .requirement-form {
+    grid-template-columns: 1fr;
+  }
+
+  .full-span {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    font-size: 0.84rem;
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 12px 12px;
+    border-radius: 12px;
+    /* Previne zoom automático no iOS (mínimo 16px) */
+    font-size: max(16px, 0.92rem);
+  }
+
+  /* ── SCRIPT CARD (BLOCOS) MOBILE ─────────────────── */
+  .script-card {
+    padding: 12px 14px;
+  }
+
+  .script-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .script-card__status {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .script-card__nav {
+    padding-bottom: 4px;
+  }
+
+  .script-card__nav .block-button {
+    min-width: 130px;
+    max-width: 180px;
+    font-size: 0.72rem;
+  }
+
+  /* ── WORKSPACE GRID MOBILE ─────────────────── */
+  .workspace-grid {
+    display: block;
+  }
+
+  .workspace-column {
+    display: block;
+  }
+
+  /* ── INTERVIEW CARD MOBILE ─────────────────── */
+  .section-title-row,
+  .interview-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .interview-toolbar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .prompt-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .notes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── ÁREA DE RESPOSTA MOBILE ─────────────────── */
+  #answer-input {
+    rows: 4;
+    min-height: 90px;
+  }
+
+  .action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .action-row .button {
+    font-size: 0.8rem;
+    padding: 11px 8px;
+  }
+
+  /* Botão principal de salvar ocupa linha inteira */
+  .action-row #save-answer,
+  .action-row #save-requirement {
+    grid-column: 1 / -1;
+  }
+
+  /* ── REQUISITOS MOBILE ─────────────────── */
+  .requirements-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .requirement-item {
+    padding: 12px;
+  }
+
+  /* ── SECTION TITLE ROW ─────────────────── */
+  .section-title-row {
+    gap: 8px;
+  }
+
+  .section-title-row h2 {
+    font-size: 1rem;
+  }
+
+  /* ── QUALIDADE MOBILE ─────────────────── */
+  #quality-score {
+    flex-shrink: 0;
+  }
+
+  /* ── ARTEFATOS MOBILE ─────────────────── */
+  .artifact-tabs {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .artifact-tab {
+    padding: 9px 6px;
+    font-size: 0.74rem;
+  }
+
+  .export-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    padding: 8px 0 10px;
+  }
+
+  .export-bar .button {
+    width: 100%;
+    font-size: 0.76rem;
+    padding: 9px 6px;
+  }
+
+  /* Botão de reset ocupa linha inteira */
+  .export-bar #reset-session {
+    grid-column: 1 / -1;
+  }
+
+  /* ── MATRIZ RASTREABILIDADE MOBILE ─────────────────── */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .traceability-table {
+    min-width: 560px;
+    font-size: 0.78rem;
+  }
+
+  .traceability-table th,
+  .traceability-table td {
+    padding: 10px 9px;
+    min-width: 90px;
+  }
+
+  /* ── TOAST MOBILE ─────────────────── */
+  .progress-toast {
+    left: 12px;
+    right: 12px;
+    bottom: calc(var(--mobile-nav-height) + 10px);
+    font-size: 0.8rem;
+  }
+
+  /* ── FOOTER MOBILE ─────────────────── */
+  .global-footer {
+    display: none;
+  }
+
+  /* ── SIDEBAR (badge autosave) MOBILE ─────────────────── */
+  .sidebar {
+    display: none;
+  }
+
+  /* ── PILLS E CHIPS MOBILE ─────────────────── */
+  .pill {
+    font-size: 0.7rem;
+    padding: 5px 9px;
+  }
+
+  .meta-chip {
+    font-size: 0.66rem;
+    padding: 3px 7px;
+  }
+
+  /* ── BOTÕES BASE MOBILE ─────────────────── */
+  .button {
+    min-height: var(--touch-target);
+    touch-action: manipulation;
+  }
+
+  .button:active {
+    transform: scale(0.97);
+    opacity: 0.85;
+    transition: transform 80ms ease, opacity 80ms ease;
+  }
+
+  /* ── BRAND MARK MOBILE ─────────────────── */
+  .brand-mark.small {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+} /* end @media (max-width: 639px) */
