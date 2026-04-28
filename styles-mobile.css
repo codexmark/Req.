@@ -1,447 +1,352 @@
-/* ====================================================
-   MOBILE LAYOUT — Req. Codex
-   Detecta automaticamente telas < 640px e aplica
-   layout mobile-first com bottom navigation e UX touch
-   ==================================================== */
+/* ============================================================
+   MOBILE STYLES — Req. Codex
+   Ativa automaticamente em telas < 640 px.
+   Não afeta nada acima desse breakpoint.
+   ============================================================ */
 
-/* ── DETECÇÃO E VARIÁVEIS MOBILE ─────────────────── */
+/* ── VARIÁVEIS MOBILE ─────────────────────────────────────── */
 :root {
-  --mobile-nav-height: 64px;
-  --mobile-header-height: 54px;
-  --mobile-panel-radius: 20px;
-  --touch-target: 48px;
-  --slide-duration: 280ms;
-  --slide-easing: cubic-bezier(0.32, 0, 0.67, 0);
+  --mnav-h: 60px;
+  --mhdr-h: 52px;
 }
 
-/* ── BOTTOM NAVIGATION (só mobile) ─────────────────── */
-.mobile-bottom-nav {
+/* ── BOTTOM NAV (oculto por padrão) ─────────────────────────  */
+#mobile-bnav {
   display: none;
 }
 
 @media (max-width: 639px) {
 
-  /* ── RESET ESTRUTURAL ─────────────────── */
+  /* ── BASE ────────────────────────────────────────────────── */
   html {
-    overscroll-behavior: none;
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
   }
 
   body {
-    padding-bottom: var(--mobile-nav-height);
+    overflow-x: hidden;
+    /* espaço para a bottom nav */
+    padding-bottom: var(--mnav-h);
   }
 
-  /* ── GLOBAL NAV → HEADER MOBILE ─────────────────── */
+  /* ── HEADER FIXO ─────────────────────────────────────────── */
   .global-nav {
-    position: fixed;
+    /* sobrescreve sticky → fixed para não sair de cena ao rolar */
+    position: fixed !important;
     top: 0;
     left: 0;
     right: 0;
-    height: var(--mobile-header-height);
-    padding: 10px 14px;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    z-index: 100;
-    width: 100%;
-    max-width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: var(--mhdr-h);
+    padding: 0 14px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    z-index: 200;
+    box-sizing: border-box;
   }
 
-  /* Oculta links de nav no header — ficam na bottom nav */
+  /* oculta subtítulo e links no header mobile */
+  .global-nav__subtitle,
   .global-nav__links {
-    display: none;
+    display: none !important;
   }
 
   .global-nav__title {
-    font-size: 0.85rem;
+    font-size: 0.82rem !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 64vw;
-  }
-
-  .global-nav__subtitle {
-    display: none;
+    max-width: 70vw;
   }
 
   .global-nav__brand {
-    gap: 8px;
     min-width: 0;
     flex: 1 1 auto;
+    gap: 8px !important;
   }
 
-  /* ── BOTTOM NAVIGATION ─────────────────── */
-  .mobile-bottom-nav {
-    display: flex;
+  .brand-mark.small {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 10px !important;
+    font-size: 0.95rem !important;
+    flex-shrink: 0;
+  }
+
+  /* ── APP SHELL ───────────────────────────────────────────── */
+  .app-shell {
+    /* empurra conteúdo abaixo do header fixo */
+    padding-top: calc(var(--mhdr-h) + 12px) !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-bottom: 20px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    display: block !important;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  /* ── BOTTOM NAV ──────────────────────────────────────────── */
+  #mobile-bnav {
+    display: flex !important;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: var(--mobile-nav-height);
-    z-index: 100;
-    background: rgba(8, 13, 24, 0.90);
+    height: var(--mnav-h);
+    z-index: 200;
+    background: rgba(8, 13, 24, 0.94);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid rgba(148, 163, 184, 0.14);
     align-items: stretch;
   }
 
-  .mobile-nav-item {
+  .mbnav-btn {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 3px;
     padding: 0;
     border: none;
     background: transparent;
-    color: rgba(148, 163, 184, 0.55);
-    font-size: 0.62rem;
+    color: rgba(146, 163, 192, 0.5);
+    font-size: 0.58rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: color 180ms ease, background 180ms ease;
     -webkit-tap-highlight-color: transparent;
-    min-height: var(--touch-target);
+    min-height: 44px;
+    transition: color 150ms ease;
   }
 
-  .mobile-nav-item svg {
+  .mbnav-btn.is-active {
+    color: var(--accent);
+  }
+
+  .mbnav-btn:active {
+    background: rgba(55, 183, 165, 0.07);
+  }
+
+  .mbnav-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 22px;
     height: 22px;
+  }
+
+  .mbnav-icon svg {
+    width: 20px;
+    height: 20px;
     stroke: currentColor;
     fill: none;
     stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
-    transition: stroke 180ms ease, transform 180ms ease;
   }
 
-  .mobile-nav-item.is-active {
-    color: var(--accent);
-  }
-
-  .mobile-nav-item.is-active svg {
+  /* aba ativa: ícone ligeiramente elevado */
+  .mbnav-btn.is-active .mbnav-icon svg {
     transform: translateY(-1px);
   }
 
-  .mobile-nav-item:active {
-    background: rgba(55, 183, 165, 0.08);
-  }
-
-  .mobile-nav-badge {
+  .mbnav-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 4px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 3px;
     border-radius: 999px;
     background: var(--accent);
-    color: #05111d;
-    font-size: 0.52rem;
+    color: #04111c;
+    font-size: 0.5rem;
     font-weight: 800;
     position: absolute;
-    top: 6px;
-    right: calc(50% - 18px);
+    top: -4px;
+    right: -5px;
   }
 
-  /* ── APP SHELL MOBILE ─────────────────── */
-  .app-shell {
-    padding: calc(var(--mobile-header-height) + 12px) 12px 20px;
-    min-height: 100dvh;
-    max-width: 100%;
-    width: 100%;
-    display: block;
+  .mbnav-label {
+    line-height: 1;
   }
 
-  /* ── SISTEMA DE ABAS MOBILE (views) ─────────────────── */
-  .mobile-view {
-    display: none;
-  }
-
-  .mobile-view.is-active {
-    display: block;
-    animation: mobileSlideIn var(--slide-duration) var(--slide-easing) both;
-  }
-
-  @keyframes mobileSlideIn {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .mobile-view.is-active {
-      animation: none;
-    }
-  }
-
-  /* ── SURFACE CARDS MOBILE ─────────────────── */
-  .surface-card {
-    padding: 16px;
-    border-radius: var(--mobile-panel-radius);
-    margin-bottom: 14px;
-  }
-
-  /* ── TOPBAR MOBILE ─────────────────── */
+  /* ── TOPBAR ──────────────────────────────────────────────── */
   .topbar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 0 0 4px;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 0 0 4px !important;
   }
 
   .topbar h2 {
-    font-size: 1.05rem;
+    font-size: 1rem !important;
   }
 
   .topbar-actions {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-left: 0;
+    width: 100% !important;
+    margin-left: 0 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
   }
 
   .topbar-actions .button {
-    width: 100%;
-    font-size: 0.78rem;
-    padding: 10px 8px;
+    width: 100% !important;
+    font-size: 0.76rem !important;
+    padding: 10px 8px !important;
+    min-height: 44px;
   }
 
-  /* ── SESSION FORM MOBILE ─────────────────── */
+  /* ── GRIDS → 1 COLUNA ────────────────────────────────────── */
+  .workspace-grid,
+  .workspace-column,
+  .prompt-panel,
+  .notes-grid,
+  .requirements-layout,
   .form-grid,
   .form-grid-wide,
   .requirement-form {
-    grid-template-columns: 1fr;
+    display: block !important;
   }
 
-  .full-span {
-    grid-column: 1 / -1;
+  .workspace-grid > *,
+  .workspace-column > *,
+  .prompt-panel > *,
+  .notes-grid > *,
+  .requirements-layout > *,
+  .form-grid > *,
+  .form-grid-wide > *,
+  .requirement-form > * {
+    margin-bottom: 14px;
   }
 
-  label {
-    font-size: 0.84rem;
-  }
-
+  /* ── INPUTS — previne zoom automático do iOS ─────────────── */
   input,
   textarea,
   select {
-    padding: 12px 12px;
-    border-radius: 12px;
-    /* Previne zoom automático no iOS (mínimo 16px) */
-    font-size: max(16px, 0.92rem);
+    font-size: max(16px, 0.9rem) !important;
+    border-radius: 12px !important;
+    padding: 11px 12px !important;
   }
 
-  /* ── SCRIPT CARD (BLOCOS) MOBILE ─────────────────── */
-  .script-card {
-    padding: 12px 14px;
+  /* ── SURFACE CARDS ───────────────────────────────────────── */
+  .surface-card {
+    padding: 14px !important;
+    border-radius: 18px !important;
+    margin-bottom: 14px;
   }
 
-  .script-card__header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-
-  .script-card__status {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr) auto;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-  }
-
-  .script-card__nav {
-    padding-bottom: 4px;
-  }
-
-  .script-card__nav .block-button {
-    min-width: 130px;
-    max-width: 180px;
-    font-size: 0.72rem;
-  }
-
-  /* ── WORKSPACE GRID MOBILE ─────────────────── */
-  .workspace-grid {
-    display: block;
-  }
-
-  .workspace-column {
-    display: block;
-  }
-
-  /* ── INTERVIEW CARD MOBILE ─────────────────── */
-  .section-title-row,
-  .interview-toolbar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .interview-toolbar {
-    width: 100%;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .prompt-panel {
-    grid-template-columns: 1fr;
-  }
-
-  .notes-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* ── ÁREA DE RESPOSTA MOBILE ─────────────────── */
-  #answer-input {
-    rows: 4;
-    min-height: 90px;
-  }
-
+  /* ── ACTION ROW ──────────────────────────────────────────── */
   .action-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    flex-wrap: unset !important;
   }
 
-  .action-row .button {
-    font-size: 0.8rem;
-    padding: 11px 8px;
-  }
-
-  /* Botão principal de salvar ocupa linha inteira */
+  /* botão primário de salvar ocupa linha inteira */
   .action-row #save-answer,
   .action-row #save-requirement {
     grid-column: 1 / -1;
   }
 
-  /* ── REQUISITOS MOBILE ─────────────────── */
-  .requirements-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .requirement-item {
-    padding: 12px;
-  }
-
-  /* ── SECTION TITLE ROW ─────────────────── */
-  .section-title-row {
-    gap: 8px;
-  }
-
-  .section-title-row h2 {
-    font-size: 1rem;
-  }
-
-  /* ── QUALIDADE MOBILE ─────────────────── */
-  #quality-score {
-    flex-shrink: 0;
-  }
-
-  /* ── ARTEFATOS MOBILE ─────────────────── */
-  .artifact-tabs {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-  }
-
-  .artifact-tab {
-    padding: 9px 6px;
-    font-size: 0.74rem;
-  }
-
-  .export-bar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 7px;
-    padding: 8px 0 10px;
-  }
-
-  .export-bar .button {
-    width: 100%;
-    font-size: 0.76rem;
-    padding: 9px 6px;
-  }
-
-  /* Botão de reset ocupa linha inteira */
-  .export-bar #reset-session {
-    grid-column: 1 / -1;
-  }
-
-  /* ── MATRIZ RASTREABILIDADE MOBILE ─────────────────── */
-  .table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .traceability-table {
-    min-width: 560px;
-    font-size: 0.78rem;
-  }
-
-  .traceability-table th,
-  .traceability-table td {
-    padding: 10px 9px;
-    min-width: 90px;
-  }
-
-  /* ── TOAST MOBILE ─────────────────── */
-  .progress-toast {
-    left: 12px;
-    right: 12px;
-    bottom: calc(var(--mobile-nav-height) + 10px);
-    font-size: 0.8rem;
-  }
-
-  /* ── FOOTER MOBILE ─────────────────── */
-  .global-footer {
-    display: none;
-  }
-
-  /* ── SIDEBAR (badge autosave) MOBILE ─────────────────── */
-  .sidebar {
-    display: none;
-  }
-
-  /* ── PILLS E CHIPS MOBILE ─────────────────── */
-  .pill {
-    font-size: 0.7rem;
-    padding: 5px 9px;
-  }
-
-  .meta-chip {
-    font-size: 0.66rem;
-    padding: 3px 7px;
-  }
-
-  /* ── BOTÕES BASE MOBILE ─────────────────── */
+  /* ── BOTÕES ──────────────────────────────────────────────── */
   .button {
-    min-height: var(--touch-target);
+    min-height: 44px;
     touch-action: manipulation;
   }
 
   .button:active {
-    transform: scale(0.97);
-    opacity: 0.85;
-    transition: transform 80ms ease, opacity 80ms ease;
+    transform: scale(0.97) !important;
+    opacity: 0.82;
   }
 
-  /* ── BRAND MARK MOBILE ─────────────────── */
-  .brand-mark.small {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
-    font-size: 0.9rem;
-    flex-shrink: 0;
+  /* ── EXPORT BAR ──────────────────────────────────────────── */
+  .export-bar {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    flex-direction: unset !important;
+  }
+
+  .export-bar .button {
+    width: 100% !important;
+    font-size: 0.74rem !important;
+    padding: 9px 6px !important;
+  }
+
+  /* reset ocupa linha inteira */
+  .export-bar #reset-session {
+    grid-column: 1 / -1;
+  }
+
+  /* ── ARTIFACT TABS ───────────────────────────────────────── */
+  .artifact-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .artifact-tab {
+    padding: 9px 4px !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* ── TABELA RASTREABILIDADE ──────────────────────────────── */
+  .table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .traceability-table {
+    min-width: 520px !important;
+    font-size: 0.76rem !important;
+  }
+
+  /* ── TOAST acima da bottom nav ───────────────────────────── */
+  .progress-toast {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(var(--mnav-h) + 8px) !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* ── FOOTER e SIDEBAR ocultos ────────────────────────────── */
+  .global-footer,
+  .sidebar {
+    display: none !important;
+  }
+
+  /* ── ROTEIRO (scroll horizontal) ────────────────────────── */
+  .script-card__nav {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .script-card__nav::-webkit-scrollbar { display: none; }
+
+  /* ── ANIMAÇÃO DE ENTRADA AO TROCAR VIEW ─────────────────── */
+  @keyframes mbFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .surface-card {
+    animation: mbFadeIn 220ms ease both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .surface-card { animation: none !important; }
   }
 
 } /* end @media (max-width: 639px) */

@@ -1,210 +1,221 @@
 /**
  * mobile-patch.js — Req. Codex
- * Detecta telas mobile, injeta bottom navigation e
- * gerencia troca de views sem alterar app.js.
+ * DEVE ser carregado APÓS app.js (sem defer).
+ * Detecta telas < 640 px, injeta bottom nav e gerencia
+ * visibilidade de seções sem tocar no app.js.
  */
-
 (function () {
-  const MOBILE_BREAKPOINT = 640;
+  'use strict';
 
-  /* ── BOTTOM NAV HTML ───────────────────────────── */
-  const NAV_HTML = `
-<nav class="mobile-bottom-nav" role="navigation" aria-label="Navegação principal">
-  <button class="mobile-nav-item is-active" data-view="workspace" aria-label="Workspace">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-      <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-      <rect x="3" y="14" width="7" height="7" rx="1.5"/>
-      <rect x="14" y="14" width="7" height="7" rx="1.5"/>
-    </svg>
-    Sessão
-  </button>
-  <button class="mobile-nav-item" data-view="requirements" aria-label="Requisitos">
-    <span style="position:relative;display:inline-flex;">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M9 11l3 3L22 4"/>
-        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-      </svg>
-      <span class="mobile-nav-badge" id="mobile-req-badge">0</span>
-    </span>
-    Requisitos
-  </button>
-  <button class="mobile-nav-item" data-view="artifacts" aria-label="Artefatos">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-      <polyline points="14 2 14 8 20 8"/>
-      <line x1="16" y1="13" x2="8" y2="13"/>
-      <line x1="16" y1="17" x2="8" y2="17"/>
-      <polyline points="10 9 9 9 8 9"/>
-    </svg>
-    Artefatos
-  </button>
-  <button class="mobile-nav-item" data-view="config" aria-label="Configurações da sessão">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-    </svg>
-    Config
-  </button>
-</nav>`;
+  var BP = 640;
 
-  /* ── ESTADO ──────────────────────────────────────── */
-  let isMobile = false;
-  let activeView = 'workspace';
+  /* ── MAPA DE ABAS ─────────────────────────────────────────────
+     Cada entrada mapeia um data-view para um array de IDs/seletores
+     de elementos JÁ PRESENTES no HTML estático.              */
+  var VIEW_SECTIONS = {
+    sessao: [
+      '.configuration-card',
+      '.script-card'
+    ],
+    entrevista: [
+      '.interview-card'
+    ],
+    requisitos: [
+      '#requirements',
+      '.surface-card:has(#quality-list)'
+    ],
+    artefatos: [
+      '#artifacts'
+    ]
+  };
 
-  /* ── INICIALIZAÇÃO ─────────────────────────────── */
+  var NAV_ITEMS = [
+    { view: 'sessao',      icon: iconGrid(),     label: 'Sessão' },
+    { view: 'entrevista',  icon: iconChat(),     label: 'Entrevista' },
+    { view: 'requisitos',  icon: iconCheck(),    label: 'Requisitos', badge: true },
+    { view: 'artefatos',   icon: iconFile(),     label: 'Artefatos' }
+  ];
+
+  /* ── ESTADO ──────────────────────────────────────────────── */
+  var active      = 'sessao';
+  var mobileOn    = false;
+  var observer    = null;
+
+  /* ── BOOT ────────────────────────────────────────────────── */
   function init() {
-    checkMobile();
-    window.addEventListener('resize', debounce(checkMobile, 150));
+    check();
+    window.addEventListener('resize', debounce(check, 120));
   }
 
-  function checkMobile() {
-    const wasMobile = isMobile;
-    isMobile = window.innerWidth < MOBILE_BREAKPOINT;
-
-    if (isMobile && !wasMobile) {
-      enableMobile();
-    } else if (!isMobile && wasMobile) {
-      disableMobile();
-    }
+  function check() {
+    var now = window.innerWidth < BP;
+    if (now && !mobileOn) { enable(); }
+    else if (!now && mobileOn) { disable(); }
   }
 
-  /* ── HABILITAR MODO MOBILE ─────────────────────── */
-  function enableMobile() {
-    injectBottomNav();
-    wrapViews();
-    activateView(activeView);
-    syncBadges();
-    startBadgeSync();
+  /* ── HABILITAR ───────────────────────────────────────────── */
+  function enable() {
+    mobileOn = true;
+    injectNav();
+    showView(active);
+    startBadgeObserver();
   }
 
-  /* ── DESABILITAR MODO MOBILE (volta ao desktop) ── */
-  function disableMobile() {
-    const nav = document.querySelector('.mobile-bottom-nav');
+  /* ── DESABILITAR ─────────────────────────────────────────── */
+  function disable() {
+    mobileOn = false;
+
+    var nav = document.getElementById('mobile-bnav');
     if (nav) nav.remove();
 
-    document.querySelectorAll('.mobile-view').forEach(wrapper => {
-      while (wrapper.firstChild) {
-        wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
+    /* restaura todas as seções */
+    Object.keys(VIEW_SECTIONS).forEach(function (v) {
+      getSections(v).forEach(show);
+    });
+
+    stopBadgeObserver();
+  }
+
+  /* ── NAVEGAÇÃO ───────────────────────────────────────────── */
+  function injectNav() {
+    if (document.getElementById('mobile-bnav')) return;
+
+    var nav = document.createElement('nav');
+    nav.id = 'mobile-bnav';
+    nav.setAttribute('role', 'navigation');
+    nav.setAttribute('aria-label', 'Navegação principal');
+
+    NAV_ITEMS.forEach(function (item) {
+      var btn = document.createElement('button');
+      btn.className = 'mbnav-btn' + (item.view === active ? ' is-active' : '');
+      btn.dataset.view = item.view;
+      btn.setAttribute('aria-label', item.label);
+      btn.type = 'button';
+
+      var iconWrap = document.createElement('span');
+      iconWrap.className = 'mbnav-icon';
+      iconWrap.setAttribute('aria-hidden', 'true');
+      iconWrap.innerHTML = item.icon;
+
+      if (item.badge) {
+        var badge = document.createElement('span');
+        badge.className = 'mbnav-badge';
+        badge.id = 'mbnav-req-badge';
+        badge.style.display = 'none';
+        iconWrap.appendChild(badge);
       }
-      wrapper.remove();
-    });
 
-    stopBadgeSync();
-  }
+      var lbl = document.createElement('span');
+      lbl.className = 'mbnav-label';
+      lbl.textContent = item.label;
 
-  /* ── INJETA BOTTOM NAV ───────────────────────────── */
-  function injectBottomNav() {
-    if (document.querySelector('.mobile-bottom-nav')) return;
-    document.body.insertAdjacentHTML('beforeend', NAV_HTML);
+      btn.appendChild(iconWrap);
+      btn.appendChild(lbl);
 
-    document.querySelectorAll('.mobile-nav-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        activateView(btn.dataset.view);
+      btn.addEventListener('click', function () {
+        showView(item.view);
       });
-    });
-  }
 
-  /* ── ENVOLVE SEÇÕES EM VIEWS MOBILE ─────────────── */
-  function wrapViews() {
-    if (document.querySelector('.mobile-view')) return;
-
-    const mainContent = document.querySelector('.main-content');
-    if (!mainContent) return;
-
-    wrapSection('config', ['.configuration-card']);
-    wrapSection('workspace', [
-      '.script-card',
-      '.workspace-grid .workspace-column:first-child',
-    ]);
-    wrapSection('requirements', [
-      '#requirements',
-      '.surface-card:has(#quality-list)',
-    ]);
-    wrapSection('artifacts', ['#artifacts']);
-
-    const topbar = mainContent.querySelector('.topbar');
-    if (topbar && !topbar.closest('.mobile-view')) {
-      mainContent.insertBefore(topbar, mainContent.firstChild);
-    }
-  }
-
-  function wrapSection(viewId, selectors) {
-    const mainContent = document.querySelector('.main-content');
-    if (!mainContent) return;
-
-    const wrapper = document.createElement('section');
-    wrapper.className = 'mobile-view';
-    wrapper.dataset.view = viewId;
-
-    const elements = [];
-    selectors.forEach(sel => {
-      mainContent.querySelectorAll(sel).forEach(el => {
-        if (!el.closest('.mobile-view')) {
-          elements.push(el);
-        }
-      });
+      nav.appendChild(btn);
     });
 
-    if (!elements.length) return;
-
-    elements[0].parentNode.insertBefore(wrapper, elements[0]);
-    elements.forEach(el => wrapper.appendChild(el));
+    document.body.appendChild(nav);
   }
 
-  /* ── ATIVA UMA VIEW ─────────────────────────────── */
-  function activateView(viewId) {
-    activeView = viewId;
+  function showView(viewId) {
+    active = viewId;
 
-    document.querySelectorAll('.mobile-view').forEach(view => {
-      view.classList.toggle('is-active', view.dataset.view === viewId);
+    /* esconde tudo, mostra o selecionado */
+    Object.keys(VIEW_SECTIONS).forEach(function (v) {
+      var els = getSections(v);
+      if (v === viewId) { els.forEach(show); }
+      else { els.forEach(hide); }
     });
 
-    document.querySelectorAll('.mobile-nav-item').forEach(btn => {
-      btn.classList.toggle('is-active', btn.dataset.view === viewId);
+    /* atualiza botões */
+    var btns = document.querySelectorAll('.mbnav-btn');
+    btns.forEach(function (b) {
+      b.classList.toggle('is-active', b.dataset.view === viewId);
     });
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /* ── BADGE DE CONTAGEM DE REQUISITOS ────────────── */
-  let badgeTimer = null;
+  /* ── HELPERS DOM ─────────────────────────────────────────── */
+  function getSections(viewId) {
+    var found = [];
+    var selectors = VIEW_SECTIONS[viewId] || [];
+    selectors.forEach(function (sel) {
+      try {
+        document.querySelectorAll(sel).forEach(function (el) {
+          found.push(el);
+        });
+      } catch (e) { /* seletor com :has pode falhar em browsers antigos */ }
+    });
+    return found;
+  }
 
-  function syncBadges() {
-    const badge = document.getElementById('mobile-req-badge');
+  function show(el) {
+    el.style.removeProperty('display');
+  }
+
+  function hide(el) {
+    el.style.display = 'none';
+  }
+
+  /* ── BADGE (MutationObserver no #requirement-count) ─────── */
+  function startBadgeObserver() {
+    stopBadgeObserver();
+    var target = document.getElementById('requirement-count');
+    if (!target) return;
+
+    syncBadge(target);
+
+    observer = new MutationObserver(function () {
+      syncBadge(target);
+    });
+    observer.observe(target, { childList: true, characterData: true, subtree: true });
+  }
+
+  function stopBadgeObserver() {
+    if (observer) { observer.disconnect(); observer = null; }
+  }
+
+  function syncBadge(countEl) {
+    var badge = document.getElementById('mbnav-req-badge');
     if (!badge) return;
-    const count = document.getElementById('requirement-count');
-    const value = count ? count.textContent.trim() : '0';
-    badge.textContent = value;
-    badge.style.display = (parseInt(value) > 0) ? 'inline-flex' : 'none';
+    var n = parseInt(countEl.textContent, 10) || 0;
+    badge.textContent = n;
+    badge.style.display = n > 0 ? 'inline-flex' : 'none';
   }
 
-  function startBadgeSync() {
-    stopBadgeSync();
-    badgeTimer = setInterval(syncBadges, 1200);
-  }
-
-  function stopBadgeSync() {
-    if (badgeTimer) {
-      clearInterval(badgeTimer);
-      badgeTimer = null;
-    }
-  }
-
-  /* ── UTILITÁRIO ─────────────────────────────────── */
+  /* ── UTILITÁRIOS ─────────────────────────────────────────── */
   function debounce(fn, ms) {
-    let t;
-    return (...args) => {
+    var t;
+    return function () {
       clearTimeout(t);
-      t = setTimeout(() => fn(...args), ms);
+      t = setTimeout(fn, ms);
     };
   }
 
-  /* ── ARRANQUE ──────────────────────────────────── */
+  /* ── ÍCONES SVG ──────────────────────────────────────────── */
+  function iconGrid() {
+    return '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>';
+  }
+  function iconChat() {
+    return '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+  }
+  function iconCheck() {
+    return '<svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+  }
+  function iconFile() {
+    return '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
+  }
+
+  /* ── ARRANQUE ────────────────────────────────────────────── */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
-
-})();
+}());
