@@ -10,9 +10,37 @@ const acceptanceCriteriaList = document.getElementById('acceptance-criteria-list
 let createdCards = JSON.parse(localStorage.getItem('createdCards') || '[]');
 let editingCardId = null;
 let acceptanceCriteria = [];
+let webhookUrl = null;
 
-function sendToDiscord(card, action = 'create', cardIndex = null) {
-  const webhookUrl = 'https://discordapp.com/api/webhooks/1500714126488502293/oEsgcW5jBJWw67lQN4paF5Z7hXKs4tBj45_ZbK3CBTgLDg17BWh8uON7bEhpVlLDxD7l';
+// Load environment variables from .env file
+async function loadEnv() {
+  try {
+    const response = await fetch('.env');
+    const text = await response.text();
+    const lines = text.split('\n');
+    for (const line of lines) {
+      if (line.trim().startsWith('DISCORD_WEBHOOK_URL=')) {
+        webhookUrl = line.split('=')[1].trim();
+        break;
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar .env:', error);
+  }
+}
+
+// Load env on script load
+loadEnv();
+
+async function sendToDiscord(card, action = 'create', cardIndex = null) {
+  if (!webhookUrl) {
+    console.warn('Webhook URL não carregada. Tentando recarregar...');
+    await loadEnv();
+    if (!webhookUrl) {
+      console.error('Falha ao carregar webhook URL do .env');
+      return;
+    }
+  }
 
   let title, color, description;
 
