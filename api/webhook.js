@@ -1,3 +1,6 @@
+const https = require('https');
+const url = require('url');
+
 export default async function handler(req, res) {
   // Only allow POST requests
   if (req.method !== 'POST') {
@@ -89,19 +92,39 @@ export default async function handler(req, res) {
       }]
     };
 
-    const response = await fetch(webhookUrl, {
+    // Send to Discord using native Node.js https
+    const webhookData = JSON.stringify(message);
+    const webhookUrlParsed = url.parse(webhookUrl);
+
+    const options = {
+      hostname: webhookUrlParsed.hostname,
+      path: webhookUrlParsed.path,
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(message)
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(webhookData)
+      }
+    };
+
+    const discordReq = https.request(options, (discordRes) => {
+      if (discordRes.statusCode >= 200 && discordRes.statusCode < 300) {
+        res.status(200).json({ success: true });
+      } else {
+        console.error('Discord API error:', discordRes.statusCode);
+        res.status(500).json({ error: 'Failed to send to Discord' });
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`Discord API error: ${response.status}`);
-    }
+    discordReq.on('error', (error) => {
+      console.error('Error sending to Discord:', error);
+      res.status(500).json({ error: 'Failed to send to Discord' });
+    });
 
-    res.status(200).json({ success: true });
+    discordReq.write(webhookData);
+    discordReq.end();
+
   } catch (error) {
-    console.error('Erro ao enviar para Discord:', error);
-    res.status(500).json({ error: 'Failed to send to Discord' });
+    console.error('Erro ao processar webhook:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 }
