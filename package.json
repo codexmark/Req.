@@ -7,9 +7,7 @@
     "dev": "python3 -m http.server 8000",
     "build": "echo 'No build step required'"
   },
-  "dependencies": {
-    "node-fetch": "^2.6.7"
-  },
+  "dependencies": {},
   "devDependencies": {},
   "keywords": ["cards", "discord", "webhook"],
   "author": "codexmark",
