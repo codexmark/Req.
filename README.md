@@ -27,10 +27,24 @@ Aplicação web estática para conduzir sessões de elicitação de requisitos c
 
 ### Deploy na Vercel
 
-1. Conecte seu repositório GitHub à Vercel
-2. Adicione a variável de ambiente:
-   - `DISCORD_WEBHOOK_URL`: Sua URL do webhook do Discord
-3. Deploy automático será feito
+1. **Conecte seu repositório GitHub à Vercel**
+   - Acesse [vercel.com](https://vercel.com)
+   - Importe seu repositório GitHub
+
+2. **Configure as variáveis de ambiente:**
+   - No dashboard da Vercel, vá para Settings > Environment Variables
+   - Adicione: `DISCORD_WEBHOOK_URL` com sua URL do webhook do Discord
+
+3. **Deploy automático:**
+   - Todo push na branch main fará deploy automático
+   - A API estará disponível em `https://seu-projeto.vercel.app/api/webhook`
+
+### Como obter o Discord Webhook URL
+
+1. No Discord, vá para Server Settings > Integrations > Webhooks
+2. Clique em "New Webhook" ou edite um existente
+3. Copie a URL do webhook
+4. Cole como valor da variável `DISCORD_WEBHOOK_URL`
 
 ## Funcionalidades
 
