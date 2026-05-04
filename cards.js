@@ -11,14 +11,39 @@ let createdCards = JSON.parse(localStorage.getItem('createdCards') || '[]');
 let editingCardId = null;
 let acceptanceCriteria = [];
 
-function sendToDiscord(card) {
+function sendToDiscord(card, action = 'create', cardIndex = null) {
   const webhookUrl = 'https://discordapp.com/api/webhooks/1500714126488502293/oEsgcW5jBJWw67lQN4paF5Z7hXKs4tBj45_ZbK3CBTgLDg17BWh8uON7bEhpVlLDxD7l';
+
+  let title, color, description;
+
+  switch (action) {
+    case 'create':
+      title = 'Novo Card Criado! 📋';
+      color = 0x37b7a5; // Verde (accent)
+      description = 'Um novo card foi adicionado ao sistema.';
+      break;
+    case 'update':
+      title = 'Card Atualizado! ✏️';
+      color = 0xf59e0b; // Amarelo (warning)
+      description = `O card ${cardIndex + 1} foi editado.`;
+      break;
+    case 'delete':
+      title = 'Card Excluído! 🗑️';
+      color = 0xf9736b; // Vermelho (danger)
+      description = `O card ${cardIndex + 1} foi removido do sistema.`;
+      break;
+    default:
+      title = 'Card Modificado! 📝';
+      color = 0x37b7a5;
+      description = 'Uma ação foi realizada em um card.';
+  }
 
   const message = {
     embeds: [{
-      title: 'Novo Card Criado! 📋',
-      color: 0x37b7a5, // Accent color
-      fields: [
+      title: title,
+      description: description,
+      color: color,
+      fields: action !== 'delete' ? [
         {
           name: 'Contexto',
           value: card.contexto || 'N/A',
@@ -49,8 +74,17 @@ function sendToDiscord(card) {
           value: card.observacao || 'Nenhuma',
           inline: false
         }
+      ] : [
+        {
+          name: 'Informações do Card Removido',
+          value: 'O card foi permanentemente excluído do sistema.',
+          inline: false
+        }
       ],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      footer: {
+        text: `Ação realizada em ${new Date().toLocaleString('pt-BR')}`
+      }
     }]
   };
 
@@ -161,12 +195,12 @@ createCardBtn.addEventListener('click', (e) => {
 
   if (editingCardId !== null) {
     createdCards[editingCardId] = card;
+    sendToDiscord(card, 'update', editingCardId);
     editingCardId = null;
     createCardBtn.textContent = 'Criar Card';
   } else {
     createdCards.push(card);
-    // Send to Discord webhook
-    sendToDiscord(card);
+    sendToDiscord(card, 'create', createdCards.length - 1);
   }
 
   localStorage.setItem('createdCards', JSON.stringify(createdCards));
@@ -198,6 +232,8 @@ createdCardsList.addEventListener('click', (e) => {
   } else if (e.target.classList.contains('delete-card')) {
     if (confirm('Tem certeza que deseja excluir este card?')) {
       const id = parseInt(e.target.dataset.id);
+      const cardToDelete = createdCards[id];
+      sendToDiscord(cardToDelete, 'delete', id);
       createdCards.splice(id, 1);
       localStorage.setItem('createdCards', JSON.stringify(createdCards));
       renderCreatedCards();
