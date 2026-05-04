@@ -1,16 +1,10 @@
-const https = require('https');
-const url = require('url');
-
 export default async function handler(req, res) {
-  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     const { card, action, cardIndex } = req.body;
-
-    // Get webhook URL from environment variable
     const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
     if (!webhookUrl) {
@@ -18,113 +12,54 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Webhook URL not configured' });
     }
 
-    let title, color, description;
-
-    switch (action) {
-      case 'create':
-        title = 'Novo Card Criado! 📋';
-        color = 0x37b7a5; // Verde (accent)
-        description = 'Um novo card foi adicionado ao sistema.';
-        break;
-      case 'update':
-        title = 'Card Atualizado! ✏️';
-        color = 0xf59e0b; // Amarelo (warning)
-        description = `O card ${cardIndex + 1} foi editado.`;
-        break;
-      case 'delete':
-        title = 'Card Excluído! 🗑️';
-        color = 0xf9736b; // Vermelho (danger)
-        description = `O card ${cardIndex + 1} foi removido do sistema.`;
-        break;
-      default:
-        title = 'Card Modificado! 📝';
-        color = 0x37b7a5;
-        description = 'Uma ação foi realizada em um card.';
-    }
+    const titles = {
+      create: 'Novo Card Criado! 📋',
+      update: 'Card Atualizado! ✏️',
+      delete: 'Card Excluído! 🗑️'
+    };
+    const colors = { create: 0x37b7a5, update: 0xf59e0b, delete: 0xf9736b };
 
     const message = {
       embeds: [{
-        title: title,
-        description: description,
-        color: color,
+        title: titles[action] || 'Card Modificado',
+        color: colors[action] || 0x37b7a5,
         fields: action !== 'delete' ? [
-          {
-            name: 'Contexto',
-            value: card.contexto || 'N/A',
-            inline: false
-          },
-          {
-            name: 'Comportamento Atual',
-            value: card.comportamentoAtual || 'N/A',
-            inline: false
-          },
-          {
-            name: 'Comportamento Esperado',
-            value: card.comportamentoEsperado || 'N/A',
-            inline: false
-          },
-          {
-            name: 'Regras de Negócio',
-            value: card.regrasNegocio || 'N/A',
-            inline: false
-          },
-          {
-            name: 'Critérios de Aceite',
-            value: card.criteriosAceite.length > 0 ? card.criteriosAceite.map((c, i) => `${i + 1}. ${c}`).join('\n') : 'Nenhum',
-            inline: false
-          },
-          {
-            name: 'Observação',
-            value: card.observacao || 'Nenhuma',
-            inline: false
-          }
-        ] : [
-          {
-            name: 'Informações do Card Removido',
-            value: 'O card foi permanentemente excluído do sistema.',
-            inline: false
-          }
-        ],
-        timestamp: new Date().toISOString(),
-        footer: {
-          text: `Ação realizada em ${new Date().toLocaleString('pt-BR')}`
-        }
+          { name: 'Contexto', value: card?.contexto || 'N/A', inline: false },
+          { name: 'Comportamento Atual', value: card?.comportamentoAtual || 'N/A', inline: false },
+          { name: 'Comportamento Esperado', value: card?.comportamentoEsperado || 'N/A', inline: false },
+          { name: 'Critérios de Aceite', value: card?.criteriosAceite?.length ? card.criteriosAceite.join('\n') : 'Nenhum', inline: false }
+        ] : [{ name: 'Card Removido', value: `Card ${cardIndex + 1} foi removido`, inline: false }],
+        timestamp: new Date().toISOString()
       }]
     };
 
-    // Send to Discord using native Node.js https
-    const webhookData = JSON.stringify(message);
-    const webhookUrlParsed = url.parse(webhookUrl);
-
+    const https = require('https');
+    const { URL } = require('url');
+    const parsedUrl = new URL(webhookUrl);
+    
     const options = {
-      hostname: webhookUrlParsed.hostname,
-      path: webhookUrlParsed.path,
+      hostname: parsedUrl.hostname,
+      path: parsedUrl.pathname,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(webhookData)
-      }
+      headers: { 'Content-Type': 'application/json' }
     };
 
-    const discordReq = https.request(options, (discordRes) => {
-      if (discordRes.statusCode >= 200 && discordRes.statusCode < 300) {
+    const reqDiscord = https.request(options, (resDiscord) => {
+      if (resDiscord.statusCode >= 200 && resDiscord.statusCode < 300) {
         res.status(200).json({ success: true });
       } else {
-        console.error('Discord API error:', discordRes.statusCode);
-        res.status(500).json({ error: 'Failed to send to Discord' });
+        res.status(500).json({ error: 'Webhook failed' });
       }
     });
 
-    discordReq.on('error', (error) => {
-      console.error('Error sending to Discord:', error);
-      res.status(500).json({ error: 'Failed to send to Discord' });
+    reqDiscord.on('error', (e) => {
+      res.status(500).json({ error: e.message });
     });
 
-    discordReq.write(webhookData);
-    discordReq.end();
+    reqDiscord.write(JSON.stringify(message));
+    reqDiscord.end();
 
   } catch (error) {
-    console.error('Erro ao processar webhook:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal error' });
   }
 }
