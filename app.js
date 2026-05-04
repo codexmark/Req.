@@ -338,9 +338,9 @@ function generateRequirements(onlyWhenEmpty) {
 
   const drafts = [];
   const seen = new Set(state.requirements.map((item) => normalizeKey(item.title)));
-  const behaviorLines = dedupeLines(splitLines(state.summaries.behaviors));
-  const ruleLines = dedupeLines(splitLines(state.summaries.rules));
-  const exceptionLines = dedupeLines(splitLines(state.summaries.exceptions));
+  const behaviorLines = uniqueRequirementLines(splitLines(state.summaries.behaviors));
+  const ruleLines = uniqueRequirementLines(splitLines(state.summaries.rules));
+  const exceptionLines = uniqueRequirementLines(splitLines(state.summaries.exceptions));
 
   behaviorLines.forEach((line) => {
     const requirement = buildRequirementFromLine(line, "Funcional");
@@ -356,15 +356,16 @@ function generateRequirements(onlyWhenEmpty) {
     seen.add(normalizeKey(requirement.title));
   });
 
-  if (exceptionLines.length) {
+  const riskLines = exceptionLines.filter((line) => isRiskLine(line) && !isPendingLine(line));
+  if (riskLines.length) {
     const requirement = {
-      ...createEmptyRequirement(),
+      ...createDraftRequirement(),
       title: "Tratar excecoes e cenarios de risco",
-      description: buildExceptionDescription(exceptionLines),
+      description: buildExceptionDescription(riskLines),
       type: "Regra",
       priority: "Should",
-      acceptanceCriteria: exceptionLines.map((line) => `- [ ] ${line}`).join("\n"),
-      notes: state.summaries.questions.trim(),
+      acceptanceCriteria: riskLines.map((line) => `- [ ] ${toAcceptanceSentence(line)}`).join("\n"),
+      notes: buildRequirementNotes(),
     };
     if (!seen.has(normalizeKey(requirement.title))) {
       drafts.push(requirement);
@@ -381,11 +382,11 @@ function generateRequirements(onlyWhenEmpty) {
 }
 
 function buildRequirementFromLine(line, type) {
-  const cleanLine = normalizeSentence(line);
-  if (!cleanLine) return null;
+  const cleanLine = sanitizeRequirementLine(line);
+  if (!cleanLine || !isRequirementCandidate(cleanLine) || isPendingLine(cleanLine)) return null;
 
   return {
-    ...createEmptyRequirement(),
+    ...createDraftRequirement(),
     title: buildTitleFromLine(cleanLine, type),
     description: buildDescriptionFromLine(cleanLine, type),
     type,
@@ -400,7 +401,7 @@ function buildFallbackRequirement() {
   const problem = state.summaries.problem || "resolver o problema relatado";
 
   return {
-    ...createEmptyRequirement(),
+    ...createDraftRequirement(),
     title: "Consolidar fluxo principal da necessidade",
     description: `O sistema deve ${lowercaseFirst(objective)} sem perder o foco em ${lowercaseFirst(problem)}.`,
     type: "Funcional",
@@ -411,31 +412,50 @@ function buildFallbackRequirement() {
 }
 
 function buildExceptionDescription(lines) {
-  return `O sistema deve tratar cenarios de excecao e risco observados durante a elicitação, incluindo: ${lines
+  return `O sistema deve tratar cenarios de excecao e risco observados durante a elicitacao, incluindo: ${lines
     .map((line) => lowercaseFirst(line))
     .join("; ")}.`;
 }
 
 function buildRequirementNotes() {
-  return [state.summaries.questions, state.summaries.actors].filter(Boolean).join("\n\n").trim();
+  const pending = splitLines(state.summaries.questions)
+    .filter((line) => isPendingLine(line))
+    .map((line) => `Pendencia: ${sanitizeRequirementLine(line)}`);
+  const actors = state.summaries.actors.trim() ? [`Atores: ${state.summaries.actors.trim()}`] : [];
+  return [...pending, ...actors].join("\n").trim();
 }
 
 function buildTitleFromLine(line, type) {
-  const action = line.replace(/^[-*]\s*/, "").replace(/\.$/, "");
-  const words = action.split(/\s+/).slice(0, 8).join(" ");
-  return type === "Regra" ? `Aplicar regra: ${words}` : capitalize(words);
+  const action = sanitizeRequirementLine(line).replace(/\.$/, "");
+  const condensed = action
+    .replace(/^o sistema deve\s+/i, "")
+    .replace(/^deve\s+/i, "")
+    .replace(/^ao /i, "")
+    .replace(/^os /i, "")
+    .replace(/^as /i, "");
+
+  if (/listar/i.test(action)) return "Listar apenas periodos nao cadastrados";
+  if (/calcular/i.test(action) && /admiss/i.test(action)) return "Calcular periodos desde a admissao";
+  if (/orden/i.test(action) || /recente/i.test(action)) return "Ordenar periodos do mais recente ao mais antigo";
+  if (/pagina/i.test(action)) return "Paginar a listagem de periodos pendentes";
+  if (/abrir/i.test(action) && /preench/i.test(action)) return "Abrir formulario com periodo selecionado";
+
+  const words = condensed.split(/\s+/).slice(0, 8).join(" ");
+  return type === "Regra" ? `Aplicar regra: ${capitalize(words)}` : capitalize(words);
 }
 
 function buildDescriptionFromLine(line, type) {
   const prefix = type === "Regra" ? "O sistema deve obedecer a regra de negocio:" : "O sistema deve";
-  const prepared = line.match(/^o sistema/i) ? line : `${prefix} ${lowercaseFirst(line)}`;
+  const cleanLine = sanitizeRequirementLine(line);
+  const prepared = cleanLine.match(/^o sistema/i) ? cleanLine : `${prefix} ${lowercaseFirst(cleanLine)}`;
   return ensurePeriod(prepared);
 }
 
 function buildAcceptanceForLine(line) {
+  const acceptance = toAcceptanceSentence(line);
   return [
-    `- [ ] ${ensurePeriod(capitalize(line))}`,
-    "- [ ] O comportamento esperado pode ser verificado pelo stakeholder",
+    `- [ ] ${acceptance}`,
+    "- [ ] O comportamento respeita a selecao e a regra informada pelo negocio",
   ].join("\n");
 }
 
@@ -459,6 +479,18 @@ function formToRequirement() {
 function createEmptyRequirement() {
   return {
     id: nextRequirementId(),
+    title: "",
+    description: "",
+    type: "Funcional",
+    priority: "Must",
+    acceptanceCriteria: "",
+    notes: "",
+  };
+}
+
+function createDraftRequirement() {
+  return {
+    id: "",
     title: "",
     description: "",
     type: "Funcional",
@@ -583,7 +615,12 @@ function mergeRequirements(existing, incoming) {
   incoming.forEach((item) => {
     if (!item.title && !item.description) return;
     const exists = merged.some((current) => normalizeKey(current.title) === normalizeKey(item.title));
-    if (!exists) merged.unshift(item);
+    if (!exists) {
+      merged.unshift({
+        ...item,
+        id: item.id || nextRequirementIdForList(merged),
+      });
+    }
   });
   return merged;
 }
@@ -635,8 +672,12 @@ function persist() {
 }
 
 function nextRequirementId() {
+  return nextRequirementIdForList(state.requirements);
+}
+
+function nextRequirementIdForList(list) {
   const next =
-    state.requirements.reduce((max, item) => {
+    list.reduce((max, item) => {
       const match = String(item.id || "").match(/REQ-(\d+)/);
       return Math.max(max, match ? Number(match[1]) : 0);
     }, 0) + 1;
@@ -664,6 +705,73 @@ function firstSentence(text) {
 
 function normalizeSentence(text) {
   return text.replace(/\s+/g, " ").trim();
+}
+
+function sanitizeRequirementLine(text) {
+  return normalizeSentence(String(text || "").replace(/^[-*]\s*/, ""));
+}
+
+function isNarrativeLine(line) {
+  return /^(o rh comentou|na pratica|isso acaba|hoje |atualmente |o usuario comentou|foi informado|o time comentou)/i.test(
+    sanitizeRequirementLine(line)
+  );
+}
+
+function isPendingLine(line) {
+  return /^(confirmar|validar|verificar|alinhar|entender)\b/i.test(sanitizeRequirementLine(line));
+}
+
+function isRiskLine(line) {
+  return /(exce|risco|inconsisten|falha|erro|retroativ|cenario)/i.test(sanitizeRequirementLine(line));
+}
+
+function isRequirementCandidate(line) {
+  const cleanLine = sanitizeRequirementLine(line);
+  if (!cleanLine || cleanLine.length < 18) return false;
+  if (isNarrativeLine(cleanLine)) return false;
+  if (/^\[pergunta sugerida\]/i.test(cleanLine)) return false;
+  return /(deve|deveria|precisa|listar|exibir|permitir|calcular|ordenar|paginar|abrir|preencher|bloquear|gerar)/i.test(
+    cleanLine
+  );
+}
+
+function uniqueRequirementLines(lines) {
+  const unique = [];
+  const seen = new Set();
+
+  lines.forEach((line) => {
+    const cleanLine = sanitizeRequirementLine(line);
+    if (!isRequirementCandidate(cleanLine) || isPendingLine(cleanLine)) return;
+
+    const canonical = canonicalizeRequirementMeaning(cleanLine);
+    if (seen.has(canonical)) return;
+    seen.add(canonical);
+    unique.push(cleanLine);
+  });
+
+  return unique;
+}
+
+function canonicalizeRequirementMeaning(line) {
+  return normalizeKey(
+    sanitizeRequirementLine(line)
+      .replace(/^o sistema deve obedecer a regra de negocio:\s*/i, "")
+      .replace(/^o sistema deve\s*/i, "")
+      .replace(/^deve\s*/i, "")
+      .replace(/^o modal deveria\s*/i, "")
+      .replace(/^o modal deve\s*/i, "modal ")
+      .replace(/^ao clicar em adicionar,\s*/i, "clicar adicionar ")
+      .replace(/\bja\b/gi, "")
+      .replace(/[.,]/g, "")
+  );
+}
+
+function toAcceptanceSentence(line) {
+  const cleanLine = sanitizeRequirementLine(line)
+    .replace(/^o sistema deve obedecer a regra de negocio:\s*/i, "")
+    .replace(/^o sistema deve\s*/i, "")
+    .replace(/^deve\s*/i, "");
+  return ensurePeriod(capitalize(cleanLine));
 }
 
 function capitalize(text) {
