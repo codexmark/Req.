@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "dev": "python3 -m http.server 8000",
-    "build": "mkdir -p public && cp index.html cards.html app.js cards.js styles.css styles-mobile.css mobile-patch.js public/"
+    "build": "mkdir -p public && cp index.html cards.html app.js cards.js styles.css elicitation.css styles-mobile.css mobile-patch.js public/"
   },
   "dependencies": {},
   "devDependencies": {},
