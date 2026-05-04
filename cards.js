@@ -10,119 +10,23 @@ const acceptanceCriteriaList = document.getElementById('acceptance-criteria-list
 let createdCards = JSON.parse(localStorage.getItem('createdCards') || '[]');
 let editingCardId = null;
 let acceptanceCriteria = [];
-let webhookUrl = null;
-
-// Load environment variables from .env file
-async function loadEnv() {
-  try {
-    const response = await fetch('.env');
-    const text = await response.text();
-    const lines = text.split('\n');
-    for (const line of lines) {
-      if (line.trim().startsWith('DISCORD_WEBHOOK_URL=')) {
-        webhookUrl = line.split('=')[1].trim();
-        break;
-      }
-    }
-  } catch (error) {
-    console.error('Erro ao carregar .env:', error);
-  }
-}
-
-// Load env on script load
-loadEnv();
 
 async function sendToDiscord(card, action = 'create', cardIndex = null) {
-  if (!webhookUrl) {
-    console.warn('Webhook URL não carregada. Tentando recarregar...');
-    await loadEnv();
-    if (!webhookUrl) {
-      console.error('Falha ao carregar webhook URL do .env');
-      return;
+  try {
+    const response = await fetch('/api/webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ card, action, cardIndex })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
     }
-  }
 
-  let title, color, description;
-
-  switch (action) {
-    case 'create':
-      title = 'Novo Card Criado! 📋';
-      color = 0x37b7a5; // Verde (accent)
-      description = 'Um novo card foi adicionado ao sistema.';
-      break;
-    case 'update':
-      title = 'Card Atualizado! ✏️';
-      color = 0xf59e0b; // Amarelo (warning)
-      description = `O card ${cardIndex + 1} foi editado.`;
-      break;
-    case 'delete':
-      title = 'Card Excluído! 🗑️';
-      color = 0xf9736b; // Vermelho (danger)
-      description = `O card ${cardIndex + 1} foi removido do sistema.`;
-      break;
-    default:
-      title = 'Card Modificado! 📝';
-      color = 0x37b7a5;
-      description = 'Uma ação foi realizada em um card.';
-  }
-
-  const message = {
-    embeds: [{
-      title: title,
-      description: description,
-      color: color,
-      fields: action !== 'delete' ? [
-        {
-          name: 'Contexto',
-          value: card.contexto || 'N/A',
-          inline: false
-        },
-        {
-          name: 'Comportamento Atual',
-          value: card.comportamentoAtual || 'N/A',
-          inline: false
-        },
-        {
-          name: 'Comportamento Esperado',
-          value: card.comportamentoEsperado || 'N/A',
-          inline: false
-        },
-        {
-          name: 'Regras de Negócio',
-          value: card.regrasNegocio || 'N/A',
-          inline: false
-        },
-        {
-          name: 'Critérios de Aceite',
-          value: card.criteriosAceite.length > 0 ? card.criteriosAceite.map((c, i) => `${i + 1}. ${c}`).join('\n') : 'Nenhum',
-          inline: false
-        },
-        {
-          name: 'Observação',
-          value: card.observacao || 'Nenhuma',
-          inline: false
-        }
-      ] : [
-        {
-          name: 'Informações do Card Removido',
-          value: 'O card foi permanentemente excluído do sistema.',
-          inline: false
-        }
-      ],
-      timestamp: new Date().toISOString(),
-      footer: {
-        text: `Ação realizada em ${new Date().toLocaleString('pt-BR')}`
-      }
-    }]
-  };
-
-  fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(message)
-  }).catch(error => {
+    console.log('Notificação enviada para Discord com sucesso');
+  } catch (error) {
     console.error('Erro ao enviar para Discord:', error);
-  });
+  }
 }
 
 function renderCreatedCards() {

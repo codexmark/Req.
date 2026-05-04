@@ -18,6 +18,27 @@ Aplicação web estática para conduzir sessões de elicitação de requisitos c
 
 ## Como usar
 
+### Desenvolvimento Local
+
+1. Clone o repositório
+2. Execute `npm install` (para dependências do backend)
+3. Execute `python3 -m http.server 8000` ou `npm run dev`
+4. Abra http://localhost:8000
+
+### Deploy na Vercel
+
+1. Conecte seu repositório GitHub à Vercel
+2. Adicione a variável de ambiente:
+   - `DISCORD_WEBHOOK_URL`: Sua URL do webhook do Discord
+3. Deploy automático será feito
+
+## Funcionalidades
+
+- Criador de cards com campos específicos
+- Integração com Discord via webhook
+- CRUD completo com notificações
+- Interface responsiva
+
 Abra [index.html](./index.html) no navegador.
 
 Se preferir rodar com servidor local:

@@ -1,0 +1,17 @@
+{
+  "name": "req-card-creator",
+  "version": "1.0.0",
+  "description": "Card creator with Discord webhook integration",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {},
+  "keywords": ["cards", "discord", "webhook"],
+  "author": "codexmark",
+  "license": "MIT"
+}
