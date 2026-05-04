@@ -11,6 +11,58 @@ let createdCards = JSON.parse(localStorage.getItem('createdCards') || '[]');
 let editingCardId = null;
 let acceptanceCriteria = [];
 
+function sendToDiscord(card) {
+  const webhookUrl = 'https://discordapp.com/api/webhooks/1500714126488502293/oEsgcW5jBJWw67lQN4paF5Z7hXKs4tBj45_ZbK3CBTgLDg17BWh8uON7bEhpVlLDxD7l';
+
+  const message = {
+    embeds: [{
+      title: 'Novo Card Criado! 📋',
+      color: 0x37b7a5, // Accent color
+      fields: [
+        {
+          name: 'Contexto',
+          value: card.contexto || 'N/A',
+          inline: false
+        },
+        {
+          name: 'Comportamento Atual',
+          value: card.comportamentoAtual || 'N/A',
+          inline: false
+        },
+        {
+          name: 'Comportamento Esperado',
+          value: card.comportamentoEsperado || 'N/A',
+          inline: false
+        },
+        {
+          name: 'Regras de Negócio',
+          value: card.regrasNegocio || 'N/A',
+          inline: false
+        },
+        {
+          name: 'Critérios de Aceite',
+          value: card.criteriosAceite.length > 0 ? card.criteriosAceite.map((c, i) => `${i + 1}. ${c}`).join('\n') : 'Nenhum',
+          inline: false
+        },
+        {
+          name: 'Observação',
+          value: card.observacao || 'Nenhuma',
+          inline: false
+        }
+      ],
+      timestamp: new Date().toISOString()
+    }]
+  };
+
+  fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(message)
+  }).catch(error => {
+    console.error('Erro ao enviar para Discord:', error);
+  });
+}
+
 function renderCreatedCards() {
   createdCardsList.innerHTML = '';
   createdCards.forEach((card, index) => {
@@ -113,6 +165,8 @@ createCardBtn.addEventListener('click', (e) => {
     createCardBtn.textContent = 'Criar Card';
   } else {
     createdCards.push(card);
+    // Send to Discord webhook
+    sendToDiscord(card);
   }
 
   localStorage.setItem('createdCards', JSON.stringify(createdCards));
