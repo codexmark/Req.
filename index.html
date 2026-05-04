@@ -13,27 +13,47 @@
     <link rel="stylesheet" href="./elicitation.css" />
   </head>
   <body>
-    <div class="page-shell">
-      <header class="hero">
-        <div class="hero__brand">
-          <span class="hero__mark">R</span>
-          <div>
-            <p class="eyebrow">Req. Codex</p>
-            <h1>Elicitacao orientada para gerar requisitos rapido</h1>
-            <p class="hero__copy">
-              Capture a conversa sem travas, organize o entendimento em poucos blocos e gere
-              requisitos revisaveis sem misturar isso com a pagina de cards.
-            </p>
-          </div>
+    <header class="global-nav">
+      <div class="global-nav__brand">
+        <span class="brand-mark small">F</span>
+        <div>
+          <span class="global-nav__title">Req. Codex - Framework de Analise e Registro de Objetivos</span>
+          <span class="global-nav__subtitle">Sistema de elicitacao e consolidacao de requisitos para sessoes com rastreabilidade, validacao e artefatos formais.</span>
         </div>
-        <div class="hero__actions">
-          <a class="button button--ghost" href="./cards.html">Abrir cards</a>
-          <button id="focus-toggle" class="button button--ghost" type="button">Modo foco</button>
-          <button id="reset-session" class="button button--danger" type="button">Limpar sessao</button>
-        </div>
-      </header>
+      </div>
+      <nav class="global-nav__links" aria-label="Navegacao principal">
+        <a href="./index.html">Workspace</a>
+        <a href="./cards.html">Cards</a>
+        <a href="#requirements">Requisitos</a>
+        <a href="#understanding">Entendimento</a>
+      </nav>
+    </header>
 
-      <main class="workspace">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <span id="autosave-indicator" class="autosave-badge">Auto-save ativo</span>
+      </aside>
+
+      <main class="main-content workspace">
+        <header class="hero surface-card">
+          <div class="hero__brand">
+            <span class="brand-mark">R</span>
+            <div>
+              <p class="eyebrow">Requirements Studio</p>
+              <h1>Elicitacao orientada para gerar requisitos rapido</h1>
+              <p class="hero__copy">
+                Capture a conversa sem travas, organize o entendimento em poucos blocos e gere
+                requisitos revisaveis sem misturar isso com a pagina de cards.
+              </p>
+            </div>
+          </div>
+          <div class="hero__actions">
+            <a class="button button--ghost" href="./cards.html">Abrir cards</a>
+            <button id="focus-toggle" class="button button--ghost" type="button">Modo foco</button>
+            <button id="reset-session" class="button button--danger" type="button">Limpar sessao</button>
+          </div>
+        </header>
+
         <section class="panel panel--intro">
           <div class="panel__heading">
             <div>
@@ -65,7 +85,7 @@
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel" id="understanding">
           <div class="panel__heading">
             <div>
               <p class="eyebrow">Sessao</p>
@@ -202,7 +222,7 @@
           </div>
         </section>
 
-        <section class="panel panel--requirements">
+        <section class="panel panel--requirements" id="requirements">
           <div class="panel__heading">
             <div>
               <p class="eyebrow">3. Gerar requisitos</p>
