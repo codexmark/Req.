@@ -14,6 +14,7 @@
   "author": "codexmark",
   "license": "MIT",
   "dependencies": {
+    "@upstash/redis": "^1.37.0",
     "redis": "^5.12.1"
   }
 }

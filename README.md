@@ -49,7 +49,10 @@ Defina no painel da Vercel:
 
 - `DISCORD_WEBHOOK_URL`
 
-Para autenticacao e usuarios, configure `REDIS_URL` no projeto. A camada de auth usa o client `redis` diretamente.
+Para autenticacao e usuarios, a aplicacao aceita dois cenarios:
+
+- `REDIS_URL` para conexao TCP/classica
+- envs REST da Vercel KV / Upstash (`KV_REST_API_URL` + `KV_REST_API_TOKEN` ou equivalentes `UPSTASH_*`)
 
 Mantenha no repositório apenas o arquivo de exemplo:
 
