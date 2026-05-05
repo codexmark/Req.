@@ -5,11 +5,28 @@
   "main": "index.html",
   "scripts": {
     "dev": "python3 -m http.server 8000",
-    "build": "mkdir -p public && cp index.html cards.html app.js cards.js styles.css elicitation.css styles-mobile.css mobile-patch.js public/"
+    "build": "mkdir -p public && cp index.html cards.html app.js cards.js styles.css elicitation.css styles-mobile.css mobile-patch.js public/",
+    "lint": "eslint *.js --fix",
+    "test": "vitest run"
   },
-  "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "@vitest/coverage-v8": "^1.6.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "happy-dom": "^14.12.0",
+    "prettier": "^3.3.2",
+    "vitest": "^1.6.0"
+  },
   "keywords": ["cards", "discord", "webhook"],
   "author": "codexmark",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codexmark/Req..git"
+  },
+  "bugs": {
+    "url": "https://github.com/codexmark/Req./issues"
+  },
+  "homepage": "https://github.com/codexmark/Req.#readme"
 }
