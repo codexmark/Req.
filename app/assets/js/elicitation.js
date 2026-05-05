@@ -24,6 +24,7 @@ const initialState = {
 };
 
 const state = loadState();
+let usersDirectory = [];
 
 const els = {
   sessionForm: document.querySelector("#session-form"),
@@ -59,8 +60,10 @@ const els = {
 
 boot();
 
-function boot() {
+async function boot() {
+  await window.ReqAuth.requireAuth();
   hydrateState();
+  await loadUsers();
   wireEvents();
   syncSessionForm();
   syncSummaryFields();
@@ -71,6 +74,21 @@ function boot() {
   }
 
   render();
+}
+
+async function loadUsers() {
+  const payload = await window.ReqAuth.getUsers();
+  usersDirectory = payload.users || [];
+  renderResponsavelOptions();
+}
+
+function renderResponsavelOptions(selectedId = '') {
+  const select = els.requirementForm.elements.responsavelTecnicoId;
+  if (!select) return;
+  select.innerHTML = ['<option value="">Selecione um usuario</option>']
+    .concat(usersDirectory.map((user) => `<option value="${user.id}">${escapeHtml(user.name)}</option>`))
+    .join('');
+  select.value = selectedId || '';
 }
 
 function wireEvents() {
@@ -280,7 +298,7 @@ function renderRequirementEditor() {
     form.priority.value = "Must";
     form.acceptanceCriteria.value = "";
     form.notes.value = "";
-    form.responsavelTecnico.value = "";
+    renderResponsavelOptions();
     return;
   }
 
@@ -291,7 +309,7 @@ function renderRequirementEditor() {
   form.priority.value = current.priority;
   form.acceptanceCriteria.value = current.acceptanceCriteria;
   form.notes.value = current.notes;
-  form.responsavelTecnico.value = current.responsavelTecnico;
+  renderResponsavelOptions(current.responsavelTecnicoId || '');
 
   const score = scoreRequirement(current);
   els.editorTitle.textContent = current.title || current.id;
@@ -476,7 +494,9 @@ function formToRequirement() {
     priority: String(form.get("priority") || "Must"),
     acceptanceCriteria: String(form.get("acceptanceCriteria") || "").trim(),
     notes: String(form.get("notes") || "").trim(),
-    responsavelTecnico: String(form.get("responsavelTecnico") || "").trim(),
+    responsavelTecnicoId: String(form.get("responsavelTecnicoId") || "").trim(),
+    responsavelTecnico:
+      usersDirectory.find((user) => user.id === String(form.get("responsavelTecnicoId") || "").trim())?.name || "",
   };
 }
 
@@ -489,6 +509,7 @@ function createEmptyRequirement() {
     priority: "Must",
     acceptanceCriteria: "",
     notes: "",
+    responsavelTecnicoId: "",
     responsavelTecnico: "",
   };
 }
@@ -502,6 +523,7 @@ function createDraftRequirement() {
     priority: "Must",
     acceptanceCriteria: "",
     notes: "",
+    responsavelTecnicoId: "",
     responsavelTecnico: "",
   };
 }
@@ -652,7 +674,7 @@ function hydrateState() {
   state.session = { ...initialState.session, ...state.session };
   state.summaries = { ...initialState.summaries, ...state.summaries };
   state.requirements = Array.isArray(state.requirements)
-    ? state.requirements.map((item) => ({ responsavelTecnico: "", ...item }))
+    ? state.requirements.map((item) => ({ responsavelTecnicoId: "", responsavelTecnico: "", ...item }))
     : [];
   state.selectedRequirementId = state.selectedRequirementId || state.requirements[0]?.id || null;
   state.rawNotes = state.rawNotes || "";

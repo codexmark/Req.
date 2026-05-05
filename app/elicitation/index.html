@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./elicitation.css" />
+    <link rel="stylesheet" href="../assets/css/elicitation.css" />
   </head>
   <body>
     <header class="global-nav">
@@ -26,11 +26,12 @@
         <span class="module-caption">Entendimentos -> requisitos -> exportacao</span>
       </div>
       <nav class="global-nav__links" aria-label="Navegacao principal">
-        <a class="is-active" href="./index.html">Elicitacao</a>
-        <a href="./cards.html">Cards</a>
-        <a href="#requirements">Requisitos</a>
-        <a href="#understanding">Entendimento</a>
-      </nav>
+          <a class="is-active" href="../elicitation">Elicitacao</a>
+          <a href="../cards">Cards</a>
+          <a data-admin-only href="../users">Usuarios</a>
+          <a href="#requirements">Requisitos</a>
+          <a href="#understanding">Entendimento</a>
+        </nav>
     </header>
 
     <div class="app-shell">
@@ -57,7 +58,8 @@
             </div>
           </div>
           <div class="hero__actions">
-            <a class="button button--ghost" href="./cards.html">Abrir modulo cards</a>
+            <a class="button button--ghost" href="../cards">Abrir modulo cards</a>
+            <button class="button button--ghost" type="button" data-logout>Sair</button>
             <button id="focus-toggle" class="button button--ghost" type="button">Modo foco</button>
             <button id="reset-session" class="button button--danger" type="button">Limpar sessao</button>
           </div>
@@ -313,12 +315,9 @@
                  ></textarea>
                </label>
                <label class="requirement-form__full">
-                 Responsável técnico
-                 <input
-                   name="responsavelTecnico"
-                   placeholder="Nome ou equipe responsável"
-                 />
-               </label>
+                  Responsável técnico
+                  <select name="responsavelTecnicoId"></select>
+                </label>
 
               <div class="requirement-form__actions">
                 <button id="save-requirement" class="button button--primary" type="submit">Salvar</button>
@@ -341,6 +340,7 @@
       </div>
     </footer>
 
-    <script src="./app.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/elicitation.js"></script>
   </body>
 </html>

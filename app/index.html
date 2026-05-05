@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Req. Codex | Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./assets/css/auth.css" />
+  </head>
+  <body>
+    <main class="auth-shell">
+      <section class="auth-panel auth-panel--hero">
+        <span class="brand-mark">R</span>
+        <p class="eyebrow">Req. Codex</p>
+        <h1>Login central para os modulos de elicitação e cards</h1>
+        <p class="auth-copy">
+          Entre com sua conta para acessar os modulos protegidos, gerenciar usuarios e definir
+          responsaveis tecnicos a partir da base centralizada.
+        </p>
+        <div class="auth-highlights">
+          <span class="auth-chip">Sessao protegida</span>
+          <span class="auth-chip">Usuarios centralizados</span>
+          <span class="auth-chip">Ownership por select</span>
+        </div>
+      </section>
+
+      <section class="auth-panel auth-panel--form">
+        <div id="bootstrap-banner" class="auth-banner" hidden>
+          Primeiro acesso detectado. Crie o admin inicial para liberar o sistema.
+        </div>
+
+        <form id="login-form" class="auth-form">
+          <p class="eyebrow">Acesso</p>
+          <h2>Entrar</h2>
+          <label>
+            Email
+            <input name="email" type="email" autocomplete="email" required />
+          </label>
+          <label>
+            Senha
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <p id="login-feedback" class="auth-feedback" aria-live="polite"></p>
+          <button class="button button--primary" type="submit">Entrar</button>
+        </form>
+
+        <form id="bootstrap-form" class="auth-form" hidden>
+          <p class="eyebrow">Bootstrap</p>
+          <h2>Criar admin inicial</h2>
+          <label>
+            Nome
+            <input name="name" required />
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" required />
+          </label>
+          <label>
+            Senha
+            <input name="password" type="password" minlength="8" required />
+          </label>
+          <p id="bootstrap-feedback" class="auth-feedback" aria-live="polite"></p>
+          <button class="button button--primary" type="submit">Criar admin e entrar</button>
+        </form>
+      </section>
+    </main>
+    <script src="./assets/js/login.js"></script>
+  </body>
+  </html>

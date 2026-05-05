@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="../assets/css/cards.css" />
   </head>
   <body>
     <header class="global-nav">
@@ -26,8 +26,9 @@
         <span class="module-caption">Formulario -> revisao -> Discord</span>
       </div>
       <nav class="global-nav__links" aria-label="Navegação principal">
-        <a href="./index.html">Elicitacao</a>
-        <a class="is-active" href="./cards.html">Cards</a>
+        <a href="../elicitation">Elicitacao</a>
+        <a class="is-active" href="../cards">Cards</a>
+        <a data-admin-only href="../users">Usuarios</a>
         <a href="#card-form">Formulario</a>
         <a href="#created-cards">Fila de cards</a>
       </nav>
@@ -49,7 +50,8 @@
             </p>
           </div>
           <div class="topbar-actions">
-            <a class="button ghost" href="./index.html">Ir para elicitacao</a>
+            <a class="button ghost" href="../elicitation">Ir para elicitacao</a>
+            <button class="button ghost" type="button" data-logout>Sair</button>
           </div>
         </header>
 
@@ -104,10 +106,7 @@
             </label>
             <label>
               Responsavel Tecnico
-              <input
-                name="responsavelTecnico"
-                placeholder="Pessoa ou time responsavel pela entrega"
-              />
+              <select name="responsavelTecnicoId"></select>
             </label>
             <label class="full-span">
               Critérios de Aceite
@@ -157,6 +156,7 @@
       </div>
     </footer>
 
-    <script src="./cards.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/cards.js"></script>
   </body>
 </html>

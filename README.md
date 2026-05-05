@@ -1,77 +1,56 @@
 # Req. Codex
 
-Requirements Studio para condução e consolidação de sessões de elicitação.
+Req. Codex e uma aplicacao Vercel-first com autenticacao propria, CRUD basico de usuarios e dois modulos estaticos protegidos:
 
-Aplicação web estática para conduzir sessões de elicitação de requisitos com:
+- `Login`: autentica sessao e faz bootstrap do primeiro admin
+- `Elicitacao`: captura entendimentos, organiza contexto e gera requisitos
+- `Cards`: cria cards estruturados e envia atualizacoes para um webhook do Discord
 
-- blocos guiados de entrevista
-- perguntas adaptativas
-- progressão por bloco com foco em perguntas ainda não respondidas
-- captura de respostas
-- derivação de requisitos atômicos
-- validação de qualidade
-- backlog inicial automático
-- matriz de rastreabilidade
-- ata formal da sessão
-- exportação em Markdown e JSON
-- modo reunião para uso contínuo em entrevistas
+## Deploy
 
-## Como usar
+O projeto foi organizado para funcionar a partir de duas raizes:
 
-### Desenvolvimento Local
+- `app/`: frontend estatico publicado em `public/`
+- `api/`: funcoes serverless da Vercel
 
-1. Clone o repositório
-2. Execute `npm install` (para dependências do backend)
-3. Execute `python3 -m http.server 8000` ou `npm run dev`
-4. Abra http://localhost:8000
-
-### Deploy na Vercel
-
-1. **Conecte seu repositório GitHub à Vercel**
-   - Acesse [vercel.com](https://vercel.com)
-   - Importe seu repositório GitHub
-
-2. **Configure as variáveis de ambiente:**
-   - No dashboard da Vercel, vá para Settings > Environment Variables
-   - Adicione: `DISCORD_WEBHOOK_URL` com sua URL do webhook do Discord
-
-3. **Deploy automático:**
-   - Todo push na branch main fará deploy automático
-   - A API estará disponível em `https://seu-projeto.vercel.app/api/webhook`
-
-### Como obter o Discord Webhook URL
-
-1. No Discord, vá para Server Settings > Integrations > Webhooks
-2. Clique em "New Webhook" ou edite um existente
-3. Copie a URL do webhook
-4. Cole como valor da variável `DISCORD_WEBHOOK_URL`
-
-## Funcionalidades
-
-- Criador de cards com campos específicos
-- Integração com Discord via webhook
-- CRUD completo com notificações
-- Interface responsiva
-
-Abra [index.html](./index.html) no navegador.
-
-Se preferir rodar com servidor local:
-
-```bash
-python3 -m http.server 4173
-```
-
-Depois acesse `http://localhost:4173/meu_projeto/`.
+O `vercel.json` aponta para `public` como diretório final de saida.
 
 ## Estrutura
 
-- `index.html`: layout e componentes
-- `styles.css`: identidade visual, layout e responsividade
-- `app.js`: estado, fluxo da entrevista, validações, progressão e exportação
+- `app/index.html`: tela de login
+- `app/elicitation/index.html`: entrada do modulo de elicitacao
+- `app/cards/index.html`: entrada do modulo de cards
+- `app/users/index.html`: CRUD basico de usuarios (admin)
+- `app/assets/css/auth.css`: UI da autenticacao
+- `app/assets/css/elicitation.css`: UI do modulo de elicitacao
+- `app/assets/css/cards.css`: UI do modulo de cards
+- `app/assets/js/auth.js`: guardas de sessao e logout
+- `app/assets/js/login.js`: login e bootstrap do admin inicial
+- `app/assets/js/users.js`: CRUD de usuarios
+- `app/assets/js/elicitation.js`: logica do modulo de elicitacao
+- `app/assets/js/cards.js`: logica do modulo de cards
+- `api/auth/*`: login, logout, sessao e bootstrap
+- `api/users/*`: CRUD de usuarios
+- `api/webhook.js`: integracao serverless com Discord
 
-## Observações
+## Build
 
-- O estado da sessão fica salvo em `localStorage`
-- O app nasce com um requisito inicial semeado a partir do chat de referência
-- Os artefatos são gerados em tempo real a partir da sessão e dos requisitos cadastrados
-- O foco desta versão é uso pessoal e produtividade imediata, sem backend
+Build estatico para Vercel:
+
+```bash
+npm run build
+```
+
+Isso copia `app/` integralmente para `public/`.
+
+## Variaveis de ambiente
+
+Defina no painel da Vercel:
+
+- `DISCORD_WEBHOOK_URL`
+
+Para autenticacao e usuarios, instale e configure uma integracao Vercel KV/Redis no projeto. As variaveis dessa integracao sao injetadas automaticamente pela Vercel para o pacote `@vercel/kv`.
+
+Mantenha no repositório apenas o arquivo de exemplo:
+
+- `.env.example`

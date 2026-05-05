@@ -7,10 +7,66 @@ const addCriterionBtn = document.getElementById('add-criterion');
 const newCriterionInput = document.getElementById('new-criterion');
 const acceptanceCriteriaList = document.getElementById('acceptance-criteria-list');
 const cardFeedback = document.getElementById('card-feedback');
+const responsavelTecnicoSelect = cardForm.elements.responsavelTecnicoId;
 
 let createdCards = JSON.parse(localStorage.getItem('createdCards') || '[]');
 let editingCardId = null;
 let acceptanceCriteria = [];
+let usersDirectory = [];
+
+boot();
+
+async function boot() {
+  await window.ReqAuth.requireAuth();
+  await loadUsers();
+  wireEvents();
+  renderCreatedCards();
+}
+
+function wireEvents() {
+  addCriterionBtn.addEventListener('click', () => {
+    const text = newCriterionInput.value.trim();
+    if (text) {
+      acceptanceCriteria.push(text);
+      newCriterionInput.value = '';
+      renderAcceptanceCriteria();
+    }
+  });
+
+  newCriterionInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addCriterionBtn.click();
+    }
+  });
+
+  acceptanceCriteriaList.addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-criterion')) {
+      const index = parseInt(e.target.dataset.index);
+      acceptanceCriteria.splice(index, 1);
+      renderAcceptanceCriteria();
+    }
+  });
+
+  createCardBtn.addEventListener('click', onSubmitCard);
+  clearCardFormBtn.addEventListener('click', clearForm);
+  createdCardsList.addEventListener('click', onCardsListClick);
+}
+
+async function loadUsers() {
+  const payload = await window.ReqAuth.getUsers();
+  usersDirectory = payload.users || [];
+  renderResponsavelOptions();
+}
+
+function renderResponsavelOptions(selectedId = '') {
+  responsavelTecnicoSelect.innerHTML = ['<option value="">Selecione um usuario</option>']
+    .concat(
+      usersDirectory.map((user) => `<option value="${user.id}">${escapeHtml(user.name)}</option>`)
+    )
+    .join('');
+  responsavelTecnicoSelect.value = selectedId || '';
+}
 
 async function sendToDiscord(card, action = 'create', cardIndex = null) {
   try {
@@ -85,7 +141,7 @@ function renderCreatedCards() {
       </div>
       <div class="card-section">
         <strong>Critérios de Aceite:</strong>
-        <ul>${card.criteriosAceite.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
+        <ul>${(card.criteriosAceite || []).map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
       </div>
       ${card.observacao ? `<div class="card-section"><strong>Observação:</strong> <p>${escapeHtml(card.observacao)}</p></div>` : ''}
     `;
@@ -99,7 +155,7 @@ function renderAcceptanceCriteria() {
     const item = document.createElement('div');
     item.className = 'criterion-item';
     item.innerHTML = `
-      <span class="text">${index + 1}. ${criterion}</span>
+      <span class="text">${index + 1}. ${escapeHtml(criterion)}</span>
       <button class="remove-criterion" data-index="${index}">&times;</button>
     `;
     acceptanceCriteriaList.appendChild(item);
@@ -110,44 +166,24 @@ function clearForm() {
   cardForm.reset();
   acceptanceCriteria = [];
   renderAcceptanceCriteria();
+  renderResponsavelOptions();
   editingCardId = null;
   createCardBtn.textContent = 'Criar Card';
   setFeedback('');
 }
 
-addCriterionBtn.addEventListener('click', () => {
-  const text = newCriterionInput.value.trim();
-  if (text) {
-    acceptanceCriteria.push(text);
-    newCriterionInput.value = '';
-    renderAcceptanceCriteria();
-  }
-});
-
-newCriterionInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    addCriterionBtn.click();
-  }
-});
-
-acceptanceCriteriaList.addEventListener('click', (e) => {
-  if (e.target.classList.contains('remove-criterion')) {
-    const index = parseInt(e.target.dataset.index);
-    acceptanceCriteria.splice(index, 1);
-    renderAcceptanceCriteria();
-  }
-});
-
-createCardBtn.addEventListener('click', (e) => {
+async function onSubmitCard(e) {
   e.preventDefault();
   const formData = new FormData(cardForm);
+  const responsavelTecnicoId = String(formData.get('responsavelTecnicoId') || '');
+  const responsavel = usersDirectory.find((user) => user.id === responsavelTecnicoId);
   const card = {
     contexto: formData.get('contexto'),
     comportamentoAtual: formData.get('comportamentoAtual'),
     comportamentoEsperado: formData.get('comportamentoEsperado'),
     regrasNegocio: formData.get('regrasNegocio'),
-    responsavelTecnico: formData.get('responsavelTecnico'),
+    responsavelTecnicoId,
+    responsavelTecnico: responsavel?.name || '',
     criteriosAceite: [...acceptanceCriteria],
     observacao: formData.get('observacao')
   };
@@ -173,13 +209,9 @@ createCardBtn.addEventListener('click', (e) => {
   localStorage.setItem('createdCards', JSON.stringify(createdCards));
   renderCreatedCards();
   clearForm();
-});
+}
 
-clearCardFormBtn.addEventListener('click', () => {
-  clearForm();
-});
-
-createdCardsList.addEventListener('click', (e) => {
+function onCardsListClick(e) {
   if (e.target.classList.contains('edit-card')) {
     const id = parseInt(e.target.dataset.id);
     const card = createdCards[id];
@@ -190,9 +222,9 @@ createdCardsList.addEventListener('click', (e) => {
     cardForm.comportamentoAtual.value = card.comportamentoAtual || '';
     cardForm.comportamentoEsperado.value = card.comportamentoEsperado || '';
     cardForm.regrasNegocio.value = card.regrasNegocio || '';
-    cardForm.responsavelTecnico.value = card.responsavelTecnico || '';
+    renderResponsavelOptions(card.responsavelTecnicoId || '');
     cardForm.observacao.value = card.observacao || '';
-    acceptanceCriteria = [...card.criteriosAceite];
+    acceptanceCriteria = [...(card.criteriosAceite || [])];
     renderAcceptanceCriteria();
 
     createCardBtn.textContent = 'Salvar Edição';
@@ -209,7 +241,4 @@ createdCardsList.addEventListener('click', (e) => {
       setFeedback('Card removido da fila local.', 'info');
     }
   }
-});
-
-// Initial render
-renderCreatedCards();
+}

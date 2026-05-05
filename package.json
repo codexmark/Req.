@@ -2,10 +2,9 @@
   "name": "req-codex",
   "version": "1.0.0",
   "description": "Req. Codex with elicitation and cards modules",
-  "main": "index.html",
+  "private": true,
   "scripts": {
-    "dev": "python3 -m http.server 8000",
-    "build": "mkdir -p public && cp index.html cards.html app.js cards.js styles.css elicitation.css styles-mobile.css mobile-patch.js public/"
+    "build": "rm -rf public && mkdir -p public && cp -r app/* public/"
   },
   "keywords": [
     "cards",
@@ -14,12 +13,7 @@
   ],
   "author": "codexmark",
   "license": "MIT",
-  "devDependencies": {
-    "eslint": "^10.3.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.5",
-    "happy-dom": "^20.9.0",
-    "prettier": "^3.8.3",
-    "vitest": "^4.1.5"
+  "dependencies": {
+    "@vercel/kv": "^3.0.0"
   }
 }
