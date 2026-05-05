@@ -10,28 +10,33 @@
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../assets/css/elicitation.css" />
+    <link rel="stylesheet" href="../assets/css/elicitation.css?v=20260505a" />
   </head>
   <body>
     <header class="global-nav">
-      <div class="global-nav__brand">
-        <span class="brand-mark small">R</span>
-        <div>
-          <span class="global-nav__title">Req. Codex</span>
-          <span class="global-nav__subtitle">Modulo de elicitacao: entendimento, consolidacao e geracao de requisitos.</span>
+      <div class="global-nav__topbar">
+        <div class="global-nav__brand">
+          <span class="brand-mark small">R</span>
+          <div>
+            <span class="global-nav__title">Req. Codex</span>
+            <span class="global-nav__subtitle">Modulo de elicitacao: entendimento, consolidacao e geracao de requisitos.</span>
+          </div>
+        </div>
+        <div class="global-nav__actions">
+          <span class="module-badge">Modulo ativo: Elicitacao</span>
+          <button class="button button--ghost button--nav" type="button" data-logout>Sair</button>
         </div>
       </div>
       <div class="global-nav__meta">
-        <span class="module-badge">Modulo ativo: Elicitacao</span>
         <span class="module-caption">Entendimentos -> requisitos -> exportacao</span>
       </div>
       <nav class="global-nav__links" aria-label="Navegacao principal">
-          <a class="is-active" href="../elicitation">Elicitacao</a>
-          <a href="../cards">Cards</a>
-          <a data-admin-only href="../users">Usuarios</a>
-          <a href="#requirements">Requisitos</a>
-          <a href="#understanding">Entendimento</a>
-        </nav>
+        <a class="is-active" href="../elicitation">Elicitacao</a>
+        <a href="../cards">Cards</a>
+        <a data-admin-only href="../users">Usuarios</a>
+        <a href="#requirements">Requisitos</a>
+        <a href="#understanding">Entendimento</a>
+      </nav>
     </header>
 
     <div class="app-shell">
@@ -41,11 +46,12 @@
 
       <main class="main-content workspace">
         <header class="hero surface-card">
-          <div class="hero__brand">
-            <span class="brand-mark">R</span>
-            <div>
-              <p class="eyebrow">Requirements Studio</p>
-              <h1>Elicitacao orientada para gerar requisitos rapido</h1>
+          <div class="hero__content">
+            <div class="hero__brand">
+              <span class="brand-mark">R</span>
+              <div class="hero__copyblock">
+                <p class="eyebrow">Requirements Studio</p>
+                <h1>Elicitacao orientada para gerar requisitos com contexto e ownership</h1>
                 <p class="hero__copy">
                   Capture a conversa sem travas, consolide o entendimento em blocos objetivos e
                   transforme a sessao em requisitos revisaveis com contexto, criterio e responsavel.
@@ -55,11 +61,19 @@
                   <span class="hero__highlight">Requisitos com ownership</span>
                   <span class="hero__highlight">Exportacao pronta para backlog</span>
                 </div>
+              </div>
             </div>
+            <aside class="hero__summary">
+              <span class="hero__summary-label">Fluxo do modulo</span>
+              <strong>Entender, consolidar e transformar em requisito rastreavel.</strong>
+              <p>
+                Este modulo concentra a sessao de descoberta e gera a saida pronta para o proximo
+                passo do processo.
+              </p>
+            </aside>
           </div>
           <div class="hero__actions">
             <a class="button button--ghost" href="../cards">Abrir modulo cards</a>
-            <button class="button button--ghost" type="button" data-logout>Sair</button>
             <button id="focus-toggle" class="button button--ghost" type="button">Modo foco</button>
             <button id="reset-session" class="button button--danger" type="button">Limpar sessao</button>
           </div>
@@ -340,7 +354,7 @@
       </div>
     </footer>
 
-    <script src="../assets/js/auth.js"></script>
-    <script src="../assets/js/elicitation.js"></script>
+    <script src="../assets/js/auth.js?v=20260505a"></script>
+    <script src="../assets/js/elicitation.js?v=20260505a"></script>
   </body>
 </html>

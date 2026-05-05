@@ -71,11 +71,27 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
 }
 
+.global-nav__topbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
 .global-nav__brand,
 .global-nav__links {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.global-nav__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .global-nav__brand {
@@ -150,6 +166,10 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid rgba(55, 183, 165, 0.24);
 }
 
+.button--nav {
+  padding: 8px 12px;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 1fr;
@@ -212,11 +232,22 @@ a { color: inherit; text-decoration: none; }
   gap: 18px;
 }
 
+.hero__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.7fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
 .hero__brand {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 16px;
   align-items: start;
+}
+
+.hero__copyblock {
+  min-width: 0;
 }
 
 .brand-mark {
@@ -286,6 +317,35 @@ h3 { font-size: 0.95rem; }
   color: #cfe5ff;
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.hero__summary {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: linear-gradient(180deg, rgba(55, 183, 165, 0.1), rgba(24, 35, 58, 0.66));
+}
+
+.hero__summary-label {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero__summary strong {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.hero__summary p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
 }
 
 .hero__actions,
@@ -612,7 +672,7 @@ input:focus, textarea:focus, select:focus {
 @media (min-width: 768px) {
   .global-nav {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     padding: 18px 22px 14px;
   }
 
@@ -635,7 +695,15 @@ input:focus, textarea:focus, select:focus {
     grid-template-columns: 1fr;
   }
 
+  .hero__content {
+    grid-template-columns: 1fr;
+  }
+
   .hero__brand {
     grid-template-columns: 1fr;
+  }
+
+  .global-nav__topbar {
+    flex-direction: column;
   }
 }
