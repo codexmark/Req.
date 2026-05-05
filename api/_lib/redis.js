@@ -35,6 +35,10 @@ function getUpstashClient() {
 }
 
 export async function getRedis() {
+  if (hasRestRedis()) {
+    return getUpstashClient();
+  }
+
   if (hasTcpRedis()) {
     if (redisClient?.isOpen) {
       return redisClient;
@@ -57,9 +61,11 @@ export async function getRedis() {
     return redisClient;
   }
 
-  if (hasRestRedis()) {
-    return getUpstashClient();
-  }
-
   throw new Error("No Redis configuration found. Expected REDIS_URL or Vercel KV/Upstash REST envs.");
+}
+
+export function getRedisMode() {
+  if (hasRestRedis()) return "rest";
+  if (hasTcpRedis()) return "tcp";
+  return "none";
 }

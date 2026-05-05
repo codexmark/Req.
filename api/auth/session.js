@@ -1,4 +1,5 @@
 import { getSessionFromRequest, getUsers, isBootstrapAllowed, sanitizeUser, findUserById } from "../_lib/store.js";
+import { getRedisMode } from "../_lib/redis.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -25,6 +26,14 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error("auth/session failed", error);
-    return res.status(503).json({ error: "Auth store unavailable", code: "AUTH_STORE_UNAVAILABLE" });
+    return res.status(503).json({
+      error: "Auth store unavailable",
+      code: "AUTH_STORE_UNAVAILABLE",
+      details: error?.message || "Unknown error",
+      mode: getRedisMode(),
+      hasRedisUrl: Boolean(process.env.REDIS_URL),
+      hasKvRest: Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN),
+      hasUpstashRest: Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN),
+    });
   }
 }
