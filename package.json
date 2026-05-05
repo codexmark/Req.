@@ -1,13 +1,25 @@
 {
-  "name": "req-card-creator",
+  "name": "req-codex",
   "version": "1.0.0",
-  "description": "Card creator with Discord webhook integration",
+  "description": "Req. Codex with elicitation and cards modules",
   "main": "index.html",
   "scripts": {
     "dev": "python3 -m http.server 8000",
     "build": "mkdir -p public && cp index.html cards.html app.js cards.js styles.css elicitation.css styles-mobile.css mobile-patch.js public/"
   },
-  "keywords": ["cards", "discord", "webhook"],
+  "keywords": [
+    "cards",
+    "discord",
+    "webhook"
+  ],
   "author": "codexmark",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "happy-dom": "^20.9.0",
+    "prettier": "^3.8.3",
+    "vitest": "^4.1.5"
+  }
 }

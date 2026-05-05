@@ -27,7 +27,10 @@ export default async function handler(req, res) {
           { name: 'Contexto', value: card?.contexto || 'N/A', inline: false },
           { name: 'Comportamento Atual', value: card?.comportamentoAtual || 'N/A', inline: false },
           { name: 'Comportamento Esperado', value: card?.comportamentoEsperado || 'N/A', inline: false },
-          { name: 'Critérios de Aceite', value: card?.criteriosAceite?.length ? card.criteriosAceite.join('\n') : 'Nenhum', inline: false }
+          { name: 'Regras de Negócio', value: card?.regrasNegocio || 'N/A', inline: false },
+          { name: 'Responsável Técnico', value: card?.responsavelTecnico || 'N/A', inline: false },
+          { name: 'Critérios de Aceite', value: card?.criteriosAceite?.length ? card.criteriosAceite.join('\n') : 'Nenhum', inline: false },
+          { name: 'Observação', value: card?.observacao || 'N/A', inline: false }
         ] : [{ name: 'Card Removido', value: `Card ${cardIndex + 1} foi removido`, inline: false }],
         timestamp: new Date().toISOString()
       }]

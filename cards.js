@@ -6,6 +6,7 @@ const createdCardsList = document.getElementById('created-cards');
 const addCriterionBtn = document.getElementById('add-criterion');
 const newCriterionInput = document.getElementById('new-criterion');
 const acceptanceCriteriaList = document.getElementById('acceptance-criteria-list');
+const cardFeedback = document.getElementById('card-feedback');
 
 let createdCards = JSON.parse(localStorage.getItem('createdCards') || '[]');
 let editingCardId = null;
@@ -23,14 +24,41 @@ async function sendToDiscord(card, action = 'create', cardIndex = null) {
       throw new Error(`API error: ${response.status}`);
     }
 
-    console.log('Notificação enviada para Discord com sucesso');
+    setFeedback('Card sincronizado com o webhook do Discord.', 'success');
   } catch (error) {
     console.error('Erro ao enviar para Discord:', error);
+    setFeedback('Nao foi possivel notificar o Discord. O card foi salvo localmente.', 'error');
   }
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function setFeedback(message, kind = 'info') {
+  if (!cardFeedback) return;
+  cardFeedback.textContent = message;
+  cardFeedback.className = `form-feedback full-span is-${kind}`;
 }
 
 function renderCreatedCards() {
   createdCardsList.innerHTML = '';
+
+  if (!createdCards.length) {
+    createdCardsList.innerHTML = `
+      <div class="created-card created-card--empty">
+        <h3>Nenhum card criado ainda</h3>
+        <p>Preencha o formulario, monte os criterios e salve para iniciar sua fila de cards.</p>
+      </div>
+    `;
+    return;
+  }
+
   createdCards.forEach((card, index) => {
     const cardElement = document.createElement('div');
     cardElement.className = 'created-card';
@@ -41,22 +69,25 @@ function renderCreatedCards() {
       </div>
       <h3>Card ${index + 1}</h3>
       <div class="card-section">
-        <strong>Contexto:</strong> <p>${card.contexto || 'N/A'}</p>
+        <strong>Contexto:</strong> <p>${escapeHtml(card.contexto || 'N/A')}</p>
       </div>
       <div class="card-section">
-        <strong>Comportamento Atual:</strong> <p>${card.comportamentoAtual || 'N/A'}</p>
+        <strong>Comportamento Atual:</strong> <p>${escapeHtml(card.comportamentoAtual || 'N/A')}</p>
       </div>
       <div class="card-section">
-        <strong>Comportamento Esperado:</strong> <p>${card.comportamentoEsperado || 'N/A'}</p>
+        <strong>Comportamento Esperado:</strong> <p>${escapeHtml(card.comportamentoEsperado || 'N/A')}</p>
       </div>
       <div class="card-section">
-        <strong>Regras de Negócio:</strong> <p>${card.regrasNegocio || 'N/A'}</p>
+        <strong>Regras de Negócio:</strong> <p>${escapeHtml(card.regrasNegocio || 'N/A')}</p>
+      </div>
+      <div class="card-section">
+        <strong>Responsavel Tecnico:</strong> <p>${escapeHtml(card.responsavelTecnico || 'Nao definido')}</p>
       </div>
       <div class="card-section">
         <strong>Critérios de Aceite:</strong>
-        <ul>${card.criteriosAceite.map(c => `<li>${c}</li>`).join('')}</ul>
+        <ul>${card.criteriosAceite.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
       </div>
-      ${card.observacao ? `<div class="card-section"><strong>Observação:</strong> <p>${card.observacao}</p></div>` : ''}
+      ${card.observacao ? `<div class="card-section"><strong>Observação:</strong> <p>${escapeHtml(card.observacao)}</p></div>` : ''}
     `;
     createdCardsList.appendChild(cardElement);
   });
@@ -81,6 +112,7 @@ function clearForm() {
   renderAcceptanceCriteria();
   editingCardId = null;
   createCardBtn.textContent = 'Criar Card';
+  setFeedback('');
 }
 
 addCriterionBtn.addEventListener('click', () => {
@@ -115,13 +147,14 @@ createCardBtn.addEventListener('click', (e) => {
     comportamentoAtual: formData.get('comportamentoAtual'),
     comportamentoEsperado: formData.get('comportamentoEsperado'),
     regrasNegocio: formData.get('regrasNegocio'),
+    responsavelTecnico: formData.get('responsavelTecnico'),
     criteriosAceite: [...acceptanceCriteria],
     observacao: formData.get('observacao')
   };
 
   // Basic validation: at least one field filled
   if (!card.contexto && !card.comportamentoAtual && !card.comportamentoEsperado && !card.regrasNegocio && card.criteriosAceite.length === 0) {
-    alert('Preencha pelo menos um campo.');
+    setFeedback('Preencha pelo menos um campo relevante antes de criar o card.', 'error');
     return;
   }
 
@@ -130,9 +163,11 @@ createCardBtn.addEventListener('click', (e) => {
     sendToDiscord(card, 'update', editingCardId);
     editingCardId = null;
     createCardBtn.textContent = 'Criar Card';
+    setFeedback('Card atualizado e salvo localmente.', 'success');
   } else {
     createdCards.push(card);
     sendToDiscord(card, 'create', createdCards.length - 1);
+    setFeedback('Card criado e salvo localmente.', 'success');
   }
 
   localStorage.setItem('createdCards', JSON.stringify(createdCards));
@@ -155,11 +190,13 @@ createdCardsList.addEventListener('click', (e) => {
     cardForm.comportamentoAtual.value = card.comportamentoAtual || '';
     cardForm.comportamentoEsperado.value = card.comportamentoEsperado || '';
     cardForm.regrasNegocio.value = card.regrasNegocio || '';
+    cardForm.responsavelTecnico.value = card.responsavelTecnico || '';
     cardForm.observacao.value = card.observacao || '';
     acceptanceCriteria = [...card.criteriosAceite];
     renderAcceptanceCriteria();
 
     createCardBtn.textContent = 'Salvar Edição';
+    setFeedback('Card carregado para edicao.', 'info');
     cardForm.scrollIntoView({ behavior: 'smooth' });
   } else if (e.target.classList.contains('delete-card')) {
     if (confirm('Tem certeza que deseja excluir este card?')) {
@@ -169,6 +206,7 @@ createdCardsList.addEventListener('click', (e) => {
       createdCards.splice(id, 1);
       localStorage.setItem('createdCards', JSON.stringify(createdCards));
       renderCreatedCards();
+      setFeedback('Card removido da fila local.', 'info');
     }
   }
 });

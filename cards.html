@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cards - Req. Codex</title>
+    <title>Req. Codex | Modulo Cards</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,17 +15,21 @@
   <body>
     <header class="global-nav">
       <div class="global-nav__brand">
-        <span class="brand-mark small">F</span>
+        <span class="brand-mark small">C</span>
         <div>
-          <span class="global-nav__title">Req. Codex - Framework de Análise e Registro de Objetivos</span>
-          <span class="global-nav__subtitle">Sistema de elicitação e consolidação de requisitos para sessões com rastreabilidade, validação e artefatos formais.</span>
+          <span class="global-nav__title">Req. Codex</span>
+          <span class="global-nav__subtitle">Modulo de cards: estruturacao, revisao e envio de cards para webhook.</span>
         </div>
       </div>
+      <div class="global-nav__meta">
+        <span class="module-badge">Modulo ativo: Cards</span>
+        <span class="module-caption">Formulario -> revisao -> Discord</span>
+      </div>
       <nav class="global-nav__links" aria-label="Navegação principal">
-        <a href="./index.html">Workspace</a>
-        <a href="./cards.html">Cards</a>
-        <a href="#requirements">Requisitos</a>
-        <a href="#artifacts">Artefatos</a>
+        <a href="./index.html">Elicitacao</a>
+        <a class="is-active" href="./cards.html">Cards</a>
+        <a href="#card-form">Formulario</a>
+        <a href="#created-cards">Fila de cards</a>
       </nav>
     </header>
 
@@ -37,8 +41,15 @@
       <main class="main-content">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Cards</p>
-            <h2>Criador de Cards</h2>
+            <p class="eyebrow">Modulo Cards</p>
+            <h2>Criador de cards com webhook dedicado</h2>
+            <p class="section-copy">
+              Monte cards operacionais completos, mantenha ownership tecnico e envie atualizacoes
+              diretamente para o Discord.
+            </p>
+          </div>
+          <div class="topbar-actions">
+            <a class="button ghost" href="./index.html">Ir para elicitacao</a>
           </div>
         </header>
 
@@ -46,7 +57,15 @@
           <div class="section-title-row">
             <div>
               <p class="eyebrow">Cards</p>
-              <h2>Criador de Cards</h2>
+              <h2>Formulario dedicado ao fluxo de cards</h2>
+              <p class="section-copy">
+                Cada card pode ser criado, revisado, editado e reenviado mantendo criterios de aceite,
+                regra de negocio e responsavel tecnico no mesmo lugar.
+              </p>
+            </div>
+            <div class="button-stack">
+              <span class="pill">Webhook Discord</span>
+              <span class="pill subtle">Persistencia local</span>
             </div>
           </div>
 
@@ -83,6 +102,13 @@
                 placeholder="Liste as regras de negócio aplicáveis. Ex.: Os períodos retroativos devem ser calculados com base na data de admissão..."
               ></textarea>
             </label>
+            <label>
+              Responsavel Tecnico
+              <input
+                name="responsavelTecnico"
+                placeholder="Pessoa ou time responsavel pela entrega"
+              />
+            </label>
             <label class="full-span">
               Critérios de Aceite
               <div id="acceptance-criteria-list" class="acceptance-criteria-list">
@@ -98,7 +124,7 @@
                 <button id="add-criterion" type="button" class="button secondary">Adicionar</button>
               </div>
             </label>
-            <label class="full-span">
+            <label>
               Observação (opcional, máx. 250 caracteres)
               <textarea
                 name="observacao"
@@ -107,6 +133,7 @@
                 placeholder="Observações adicionais sobre o card."
               ></textarea>
             </label>
+            <p id="card-feedback" class="form-feedback full-span" aria-live="polite"></p>
             <div class="action-row full-span">
               <button id="create-card" class="button primary">Criar Card</button>
               <button id="clear-card-form" class="button secondary">Limpar</button>
@@ -119,6 +146,16 @@
         </section>
       </main>
     </div>
+
+    <footer class="global-footer">
+      <div class="global-footer__content">
+        <span class="global-footer__brand">Req. Codex</span>
+        <span class="global-footer__separator">•</span>
+        <span class="global-footer__credit">Todos os direitos reservados</span>
+        <span class="global-footer__separator">•</span>
+        <span class="global-footer__handle">codexmark - Mark R. Mesquita - 2026</span>
+      </div>
+    </footer>
 
     <script src="./cards.js"></script>
   </body>

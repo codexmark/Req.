@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Req. Codex | Elicitacao</title>
+    <title>Req. Codex | Modulo Elicitacao</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,18 +15,22 @@
   <body>
     <header class="global-nav">
       <div class="global-nav__brand">
-        <span class="brand-mark small">F</span>
+        <span class="brand-mark small">R</span>
         <div>
-          <span class="global-nav__title">Req. Codex - Framework de Analise e Registro de Objetivos</span>
-          <span class="global-nav__subtitle">Sistema de elicitacao e consolidacao de requisitos para sessoes com rastreabilidade, validacao e artefatos formais.</span>
+          <span class="global-nav__title">Req. Codex</span>
+          <span class="global-nav__subtitle">Modulo de elicitacao: entendimento, consolidacao e geracao de requisitos.</span>
         </div>
       </div>
-        <nav class="global-nav__links" aria-label="Navegacao principal">
-          <a href="./index.html">Workspace</a>
-          <a href="./cards.html">Cards</a>
-          <a href="#requirements">Requisitos</a>
-          <a href="#understanding">Entendimento</a>
-        </nav>
+      <div class="global-nav__meta">
+        <span class="module-badge">Modulo ativo: Elicitacao</span>
+        <span class="module-caption">Entendimentos -> requisitos -> exportacao</span>
+      </div>
+      <nav class="global-nav__links" aria-label="Navegacao principal">
+        <a class="is-active" href="./index.html">Elicitacao</a>
+        <a href="./cards.html">Cards</a>
+        <a href="#requirements">Requisitos</a>
+        <a href="#understanding">Entendimento</a>
+      </nav>
     </header>
 
     <div class="app-shell">
@@ -41,17 +45,22 @@
             <div>
               <p class="eyebrow">Requirements Studio</p>
               <h1>Elicitacao orientada para gerar requisitos rapido</h1>
-                 <p class="hero__copy">
-                   Capture a conversa sem travas, organize o entendimento em poucos blocos e gere
-                   requisitos revisaveis.
-                 </p>
+                <p class="hero__copy">
+                  Capture a conversa sem travas, consolide o entendimento em blocos objetivos e
+                  transforme a sessao em requisitos revisaveis com contexto, criterio e responsavel.
+                </p>
+                <div class="hero__highlights">
+                  <span class="hero__highlight">Entendimentos estruturados</span>
+                  <span class="hero__highlight">Requisitos com ownership</span>
+                  <span class="hero__highlight">Exportacao pronta para backlog</span>
+                </div>
             </div>
           </div>
-           <div class="hero__actions">
-             <a class="button button--ghost" href="./cards.html">Abrir cards</a>
-             <button id="focus-toggle" class="button button--ghost" type="button">Modo foco</button>
-             <button id="reset-session" class="button button--danger" type="button">Limpar sessao</button>
-           </div>
+          <div class="hero__actions">
+            <a class="button button--ghost" href="./cards.html">Abrir modulo cards</a>
+            <button id="focus-toggle" class="button button--ghost" type="button">Modo foco</button>
+            <button id="reset-session" class="button button--danger" type="button">Limpar sessao</button>
+          </div>
         </header>
 
         <section class="panel panel--intro">
@@ -250,7 +259,7 @@
                   <p class="eyebrow">Edicao</p>
                   <h3 id="editor-title">Selecione um requisito</h3>
                 </div>
-                <span class="badge" id="requirement-score">0/4 completo</span>
+                <span class="badge" id="requirement-score">0/5 completo</span>
               </div>
 
               <label>
@@ -321,6 +330,16 @@
         </section>
       </main>
     </div>
+
+    <footer class="global-footer">
+      <div class="global-footer__content">
+        <span class="global-footer__brand">Req. Codex</span>
+        <span class="global-footer__separator">•</span>
+        <span class="global-footer__credit">Todos os direitos reservados</span>
+        <span class="global-footer__separator">•</span>
+        <span class="global-footer__handle">codexmark - Mark R. Mesquita - 2026</span>
+      </div>
+    </footer>
 
     <script src="./app.js"></script>
   </body>

@@ -272,7 +272,7 @@ function renderRequirementEditor() {
 
   if (!current) {
     els.editorTitle.textContent = "Selecione um requisito";
-    els.requirementScore.textContent = "0/4 completo";
+    els.requirementScore.textContent = "0/5 completo";
     form.id.value = "";
     form.title.value = "";
     form.description.value = "";
@@ -295,7 +295,7 @@ function renderRequirementEditor() {
 
   const score = scoreRequirement(current);
   els.editorTitle.textContent = current.title || current.id;
-  els.requirementScore.textContent = `${score}/4 completo`;
+  els.requirementScore.textContent = `${score}/5 completo`;
 }
 
 function organizeUnderstanding() {
@@ -556,7 +556,7 @@ function computeGaps() {
     });
   }
 
-  if (state.requirements.some((item) => scoreRequirement(item) < 3)) {
+  if (state.requirements.some((item) => scoreRequirement(item) < 4)) {
     gaps.push({
       title: "Existem requisitos superficiais",
       detail: "Alguns rascunhos ainda precisam de descricao ou criterio de aceite melhor.",
@@ -651,7 +651,9 @@ function hydrateState() {
   if (!state.session) state.session = structuredClone(initialState.session);
   state.session = { ...initialState.session, ...state.session };
   state.summaries = { ...initialState.summaries, ...state.summaries };
-  state.requirements = Array.isArray(state.requirements) ? state.requirements : [];
+  state.requirements = Array.isArray(state.requirements)
+    ? state.requirements.map((item) => ({ responsavelTecnico: "", ...item }))
+    : [];
   state.selectedRequirementId = state.selectedRequirementId || state.requirements[0]?.id || null;
   state.rawNotes = state.rawNotes || "";
   state.focusMode = Boolean(state.focusMode);

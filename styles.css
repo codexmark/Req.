@@ -85,6 +85,11 @@ button, input, textarea, select { font: inherit; }
 .global-nav__title,
 .global-nav__subtitle { display: block; }
 
+.global-nav__meta {
+  display: grid;
+  gap: 4px;
+}
+
 .global-nav__title {
   font-family: "Manrope", sans-serif;
   font-size: 0.98rem;
@@ -98,9 +103,30 @@ button, input, textarea, select { font: inherit; }
   line-height: 1.45;
 }
 
+.module-badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: #b8fff5;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.module-caption {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
 .global-nav__links {
-  flex-wrap: wrap;
-  display: none;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 2px;
 }
 
 .global-nav__links a {
@@ -114,6 +140,12 @@ button, input, textarea, select { font: inherit; }
 .global-nav__links a:hover {
   color: var(--text);
   background: rgba(55, 183, 165, 0.12);
+}
+
+.global-nav__links a.is-active {
+  color: var(--text);
+  background: rgba(55, 183, 165, 0.16);
+  border: 1px solid rgba(55, 183, 165, 0.24);
 }
 
 .app-shell {
@@ -457,6 +489,17 @@ input:focus, textarea:focus, select:focus {
 
 .full-span { grid-column: 1 / -1; }
 
+.form-feedback {
+  min-height: 1.2rem;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.form-feedback.is-success { color: #a7f3d0; }
+.form-feedback.is-error { color: #fecaca; }
+.form-feedback.is-info { color: #bfdbfe; }
+
 .interview-card .prompt-card,
 .subpanel,
 .artifact-summary,
@@ -772,6 +815,11 @@ input:focus, textarea:focus, select:focus {
   padding: 15px;
   margin-bottom: 15px;
   position: relative;
+}
+
+.created-card--empty {
+  border-style: dashed;
+  text-align: center;
 }
 
 .created-card h3 {
