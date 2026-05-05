@@ -6,8 +6,25 @@ const bootstrapFeedback = document.getElementById('bootstrap-feedback');
 
 boot();
 
+async function parseResponse(response) {
+  const text = await response.text();
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch {
+    return { error: text || 'Unexpected response', code: 'INVALID_RESPONSE' };
+  }
+}
+
 async function boot() {
-  const session = await fetch('/api/auth/session', { credentials: 'include' }).then((response) => response.json());
+  const response = await fetch('/api/auth/session', { credentials: 'include' });
+  const session = await parseResponse(response);
+
+  if (!response.ok) {
+    loginFeedback.textContent = 'Autenticacao indisponivel no momento. Verifique a integracao KV na Vercel.';
+    loginFeedback.className = 'auth-feedback is-error';
+    return;
+  }
+
   if (session.authenticated) {
     window.location.href = '/elicitation';
     return;
@@ -35,7 +52,7 @@ async function onLogin(event) {
       password: formData.get('password'),
     }),
   });
-  const payload = await response.json();
+  const payload = await parseResponse(response);
   if (!response.ok) {
     loginFeedback.textContent = payload.error || 'Falha no login';
     loginFeedback.classList.add('is-error');
@@ -59,7 +76,7 @@ async function onBootstrap(event) {
       password: formData.get('password'),
     }),
   });
-  const payload = await response.json();
+  const payload = await parseResponse(response);
   if (!response.ok) {
     bootstrapFeedback.textContent = payload.error || 'Falha ao criar admin';
     bootstrapFeedback.classList.add('is-error');

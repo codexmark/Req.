@@ -1,7 +1,24 @@
 (function () {
+  async function parseResponse(response) {
+    const text = await response.text();
+    try {
+      return text ? JSON.parse(text) : {};
+    } catch {
+      return { error: text || 'Unexpected response', code: 'INVALID_RESPONSE' };
+    }
+  }
+
   async function getSession() {
     const response = await fetch('/api/auth/session', { credentials: 'include' });
-    return response.json();
+    const payload = await parseResponse(response);
+    if (!response.ok) {
+      return {
+        authenticated: false,
+        bootstrapRequired: false,
+        infrastructureError: payload.error || 'Auth service unavailable',
+      };
+    }
+    return payload;
   }
 
   async function requireAuth(options = {}) {
@@ -35,8 +52,9 @@
 
   async function getUsers() {
     const response = await fetch('/api/users', { credentials: 'include' });
-    if (!response.ok) throw new Error('Failed to load users');
-    return response.json();
+    const payload = await parseResponse(response);
+    if (!response.ok) throw new Error(payload.error || 'Failed to load users');
+    return payload;
   }
 
   window.ReqAuth = {

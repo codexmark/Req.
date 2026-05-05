@@ -5,11 +5,17 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const auth = await getSessionFromRequest(req);
-  if (auth?.token) {
-    await deleteSession(auth.token);
-  }
+  try {
+    const auth = await getSessionFromRequest(req);
+    if (auth?.token) {
+      await deleteSession(auth.token);
+    }
 
-  res.setHeader("Set-Cookie", buildClearedSessionCookie());
-  return res.status(200).json({ success: true });
+    res.setHeader("Set-Cookie", buildClearedSessionCookie());
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("auth/logout failed", error);
+    res.setHeader("Set-Cookie", buildClearedSessionCookie());
+    return res.status(200).json({ success: true });
+  }
 }
