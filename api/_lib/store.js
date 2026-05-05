@@ -1,5 +1,5 @@
-import { kv } from "@vercel/kv";
 import crypto from "node:crypto";
+import { getRedis } from "./redis.js";
 
 const USERS_KEY = "reqcodex:users";
 const SESSION_PREFIX = "reqcodex:session:";
@@ -33,11 +33,14 @@ export function sanitizeUser(user) {
 }
 
 export async function getUsers() {
-  return (await kv.get(USERS_KEY)) || [];
+  const redis = await getRedis();
+  const raw = await redis.get(USERS_KEY);
+  return raw ? JSON.parse(raw) : [];
 }
 
 export async function saveUsers(users) {
-  await kv.set(USERS_KEY, users);
+  const redis = await getRedis();
+  await redis.set(USERS_KEY, JSON.stringify(users));
 }
 
 export async function findUserByEmail(email) {
@@ -93,6 +96,7 @@ export function buildClearedSessionCookie() {
 }
 
 export async function createSession(user) {
+  const redis = await getRedis();
   const token = crypto.randomBytes(24).toString("hex");
   const session = {
     userId: user.id,
@@ -102,22 +106,25 @@ export async function createSession(user) {
     createdAt: new Date().toISOString(),
   };
 
-  await kv.set(`${SESSION_PREFIX}${token}`, session, { ex: SESSION_TTL_SECONDS });
+  await redis.set(`${SESSION_PREFIX}${token}`, JSON.stringify(session), { EX: SESSION_TTL_SECONDS });
   return { token, session };
 }
 
 export async function getSessionFromRequest(req) {
+  const redis = await getRedis();
   const cookies = parseCookies(req);
   const token = cookies[SESSION_COOKIE];
   if (!token) return null;
-  const session = await kv.get(`${SESSION_PREFIX}${token}`);
+  const raw = await redis.get(`${SESSION_PREFIX}${token}`);
+  const session = raw ? JSON.parse(raw) : null;
   if (!session) return null;
   return { token, session };
 }
 
 export async function deleteSession(token) {
   if (!token) return;
-  await kv.del(`${SESSION_PREFIX}${token}`);
+  const redis = await getRedis();
+  await redis.del(`${SESSION_PREFIX}${token}`);
 }
 
 export async function requireSession(req, res, role = null) {

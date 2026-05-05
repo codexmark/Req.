@@ -49,7 +49,7 @@ Defina no painel da Vercel:
 
 - `DISCORD_WEBHOOK_URL`
 
-Para autenticacao e usuarios, instale e configure uma integracao Vercel KV/Redis no projeto. As variaveis dessa integracao sao injetadas automaticamente pela Vercel para o pacote `@vercel/kv`.
+Para autenticacao e usuarios, configure `REDIS_URL` no projeto. A camada de auth usa o client `redis` diretamente.
 
 Mantenha no repositório apenas o arquivo de exemplo:
 
