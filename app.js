@@ -241,28 +241,29 @@ function renderRequirements() {
     return;
   }
 
-  state.requirements.forEach((requirement) => {
-    const li = document.createElement("li");
-    li.className = `requirement-card ${requirement.id === state.selectedRequirementId ? "is-active" : ""}`;
-    li.innerHTML = `
-      <div class="requirement-card__top">
-        <strong>${escapeHtml(requirement.title || requirement.id)}</strong>
-        <span class="badge">${escapeHtml(requirement.priority)}</span>
-      </div>
-      <p>${escapeHtml(truncate(requirement.description || "Sem descricao", 140))}</p>
-      <div class="requirement-card__meta">
-        <span>${escapeHtml(requirement.id)}</span>
-        <span>${escapeHtml(requirement.type)}</span>
-      </div>
-    `;
-    li.addEventListener("click", () => {
-      state.selectedRequirementId = requirement.id;
-      persist();
-      renderRequirementEditor();
-      renderRequirements();
-    });
-    els.requirementsList.appendChild(li);
-  });
+   state.requirements.forEach((requirement) => {
+     const li = document.createElement("li");
+     li.className = `requirement-card ${requirement.id === state.selectedRequirementId ? "is-active" : ""}`;
+     li.innerHTML = `
+       <div class="requirement-card__top">
+         <strong>${escapeHtml(requirement.title || requirement.id)}</strong>
+         <span class="badge">${escapeHtml(requirement.priority)}</span>
+       </div>
+       <p>${escapeHtml(truncate(requirement.description || "Sem descricao", 140))}</p>
+       <div class="requirement-card__meta">
+         <span>${escapeHtml(requirement.id)}</span>
+         <span>${escapeHtml(requirement.type)}</span>
+         <span>${escapeHtml(requirement.responsavelTecnico || 'Sem responsável')}</span>
+       </div>
+     `;
+     li.addEventListener("click", () => {
+       state.selectedRequirementId = requirement.id;
+       persist();
+       renderRequirementEditor();
+       renderRequirements();
+     });
+     els.requirementsList.appendChild(li);
+   });
 }
 
 function renderRequirementEditor() {
@@ -519,7 +520,7 @@ function scoreRequirement(requirement) {
     requirement.description.trim(),
     requirement.acceptanceCriteria.trim(),
     requirement.type.trim(),
-    requirement.responsavelTecnico.trim(),
+    (requirement.responsavelTecnico || '').trim(),
   ];
   return checks.filter(Boolean).length;
 }
