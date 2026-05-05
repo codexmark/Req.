@@ -279,6 +279,7 @@ function renderRequirementEditor() {
     form.priority.value = "Must";
     form.acceptanceCriteria.value = "";
     form.notes.value = "";
+    form.responsavelTecnico.value = "";
     return;
   }
 
@@ -289,6 +290,7 @@ function renderRequirementEditor() {
   form.priority.value = current.priority;
   form.acceptanceCriteria.value = current.acceptanceCriteria;
   form.notes.value = current.notes;
+  form.responsavelTecnico.value = current.responsavelTecnico;
 
   const score = scoreRequirement(current);
   els.editorTitle.textContent = current.title || current.id;
@@ -473,6 +475,7 @@ function formToRequirement() {
     priority: String(form.get("priority") || "Must"),
     acceptanceCriteria: String(form.get("acceptanceCriteria") || "").trim(),
     notes: String(form.get("notes") || "").trim(),
+    responsavelTecnico: String(form.get("responsavelTecnico") || "").trim(),
   };
 }
 
@@ -485,6 +488,7 @@ function createEmptyRequirement() {
     priority: "Must",
     acceptanceCriteria: "",
     notes: "",
+    responsavelTecnico: "",
   };
 }
 
@@ -497,6 +501,7 @@ function createDraftRequirement() {
     priority: "Must",
     acceptanceCriteria: "",
     notes: "",
+    responsavelTecnico: "",
   };
 }
 
@@ -514,6 +519,7 @@ function scoreRequirement(requirement) {
     requirement.description.trim(),
     requirement.acceptanceCriteria.trim(),
     requirement.type.trim(),
+    requirement.responsavelTecnico.trim(),
   ];
   return checks.filter(Boolean).length;
 }
@@ -591,21 +597,22 @@ function buildMarkdownExport() {
     "",
   ];
 
-  state.requirements.forEach((requirement) => {
-    lines.push(`### ${requirement.id} - ${requirement.title || "Sem titulo"}`);
-    lines.push("");
-    lines.push(`- Tipo: ${requirement.type}`);
-    lines.push(`- Prioridade: ${requirement.priority}`);
-    lines.push("");
-    lines.push(requirement.description || "Sem descricao");
-    lines.push("");
-    lines.push("#### Criterios de aceite");
-    lines.push(requirement.acceptanceCriteria || "Sem criterios");
-    lines.push("");
-    lines.push("#### Observacoes");
-    lines.push(requirement.notes || "Sem observacoes");
-    lines.push("");
-  });
+   state.requirements.forEach((requirement) => {
+     lines.push(`### ${requirement.id} - ${requirement.title || "Sem titulo"}`);
+     lines.push("");
+     lines.push(`- Tipo: ${requirement.type}`);
+     lines.push(`- Prioridade: ${requirement.priority}`);
+     lines.push(`- Responsável técnico: ${requirement.responsavelTecnico || "Não definido"}`);
+     lines.push("");
+     lines.push(requirement.description || "Sem descricao");
+     lines.push("");
+     lines.push("#### Criterios de aceite");
+     lines.push(requirement.acceptanceCriteria || "Sem criterios");
+     lines.push("");
+     lines.push("#### Observacoes");
+     lines.push(requirement.notes || "Sem observacoes");
+     lines.push("");
+   });
 
   return lines.join("\n");
 }
