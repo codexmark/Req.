@@ -26,6 +26,7 @@ export default async function handler(req, res) {
 
         return {
           allowedContentTypes,
+          maximumSizeInBytes: 10 * 1024 * 1024,
           addRandomSuffix: true,
           tokenPayload: JSON.stringify({
             userId: auth.session.userId,
@@ -33,7 +34,6 @@ export default async function handler(req, res) {
           }),
         };
       },
-      onUploadCompleted: async () => {},
     });
 
     return res.status(200).json(jsonResponse);
