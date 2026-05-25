@@ -1,4 +1,4 @@
-import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client';
+import { generateClientTokenFromReadWriteToken } from '@vercel/blob/dist/client.js';
 import { getSessionFromRequest } from '../_lib/store.js';
 
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
