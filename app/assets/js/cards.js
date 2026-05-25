@@ -255,6 +255,18 @@ function renderCreatedCards() {
         <strong>Responsavel Tecnico:</strong> <p>${escapeHtml(card.responsavelTecnico || 'Nao definido')}</p>
       </div>
       <div class="card-section">
+        <strong>Tipo:</strong> <p>${escapeHtml(card.tipo || 'Nao definido')}</p>
+      </div>
+      <div class="card-section">
+        <strong>Prioridade:</strong> <p>${escapeHtml(card.prioridade || 'Nao definida')}</p>
+      </div>
+      <div class="card-section">
+        <strong>Origem da Demanda:</strong> <p>${escapeHtml(card.origemDemanda || 'Nao informada')}</p>
+      </div>
+      <div class="card-section">
+        <strong>Impacto:</strong> <p>${escapeHtml(card.impacto || 'Nao informado')}</p>
+      </div>
+      <div class="card-section">
         <strong>Critérios de Aceite:</strong>
         <ul>${card.criteriosAceite.map((criterion) => `<li>${escapeHtml(criterion)}</li>`).join('')}</ul>
       </div>
@@ -371,6 +383,10 @@ async function onSubmitCard(event) {
   const localId = editingCardId !== null ? createdCards[editingCardId].localId : crypto.randomUUID();
   const card = {
     localId,
+    tipo: String(formData.get('tipo') || '').trim(),
+    prioridade: String(formData.get('prioridade') || '').trim(),
+    origemDemanda: String(formData.get('origemDemanda') || '').trim(),
+    impacto: String(formData.get('impacto') || '').trim(),
     contexto: String(formData.get('contexto') || '').trim(),
     comportamentoAtual: String(formData.get('comportamentoAtual') || '').trim(),
     comportamentoEsperado: String(formData.get('comportamentoEsperado') || '').trim(),
@@ -428,6 +444,10 @@ function onCardsListClick(event) {
     cardForm.comportamentoAtual.value = card.comportamentoAtual || '';
     cardForm.comportamentoEsperado.value = card.comportamentoEsperado || '';
     cardForm.regrasNegocio.value = card.regrasNegocio || '';
+    cardForm.tipo.value = card.tipo || '';
+    cardForm.prioridade.value = card.prioridade || '';
+    cardForm.origemDemanda.value = card.origemDemanda || '';
+    cardForm.impacto.value = card.impacto || '';
     renderResponsavelOptions(card.responsavelTecnicoId || '');
     cardForm.observacao.value = card.observacao || '';
     acceptanceCriteria = [...(card.criteriosAceite || [])];

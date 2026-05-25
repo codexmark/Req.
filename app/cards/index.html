@@ -76,6 +76,41 @@
               Responsavel Tecnico
               <select name="responsavelTecnicoId"></select>
             </label>
+            <label>
+              Tipo
+              <select name="tipo">
+                <option value="">Selecione</option>
+                <option value="Bug">Bug</option>
+                <option value="Melhoria">Melhoria</option>
+                <option value="Nova funcionalidade">Nova funcionalidade</option>
+                <option value="Ajuste de regra">Ajuste de regra</option>
+              </select>
+            </label>
+            <label>
+              Prioridade
+              <select name="prioridade">
+                <option value="">Selecione</option>
+                <option value="Baixa">Baixa</option>
+                <option value="Media">Media</option>
+                <option value="Alta">Alta</option>
+                <option value="Critica">Critica</option>
+              </select>
+            </label>
+            <label>
+              Origem da Demanda
+              <input
+                name="origemDemanda"
+                placeholder="Ex.: RH, Suporte, Cliente, Operacao"
+              />
+            </label>
+            <label class="full-span">
+              Impacto
+              <textarea
+                name="impacto"
+                rows="2"
+                placeholder="Ex.: retrabalho operacional, bloqueio de processo, risco financeiro..."
+              ></textarea>
+            </label>
             <label class="full-span">
               Contexto
               <textarea

@@ -113,6 +113,10 @@ async function buildDiscordPayload({ card, action, cardIndex, files }) {
     fields:
       action !== 'delete'
         ? [
+            { name: 'Tipo', value: truncateField(card?.tipo) || 'N/A', inline: true },
+            { name: 'Prioridade', value: truncateField(card?.prioridade) || 'N/A', inline: true },
+            { name: 'Origem da Demanda', value: truncateField(card?.origemDemanda) || 'N/A', inline: true },
+            { name: 'Impacto', value: truncateField(card?.impacto) || 'N/A', inline: false },
             { name: 'Contexto', value: truncateField(card?.contexto) || 'N/A', inline: false },
             {
               name: 'Comportamento Atual',
@@ -130,17 +134,17 @@ async function buildDiscordPayload({ card, action, cardIndex, files }) {
               inline: false,
             },
             {
-              name: 'Responsável Técnico',
-              value: truncateField(card?.responsavelTecnico) || 'N/A',
-              inline: false,
-            },
-            {
               name: 'Critérios de Aceite',
               value: truncateField(card?.criteriosAceite?.length ? card.criteriosAceite.join('\n') : 'Nenhum'),
               inline: false,
             },
             { name: 'Observação', value: truncateField(card?.observacao) || 'N/A', inline: false },
             { name: 'Evidências', value: mediaSummary, inline: false },
+            {
+              name: 'Responsável Técnico',
+              value: truncateField(card?.responsavelTecnico) || 'N/A',
+              inline: false,
+            },
           ]
         : [{ name: 'Card Removido', value: `Card ${Number(cardIndex) + 1} foi removido`, inline: false }],
     timestamp: new Date().toISOString(),
