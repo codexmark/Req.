@@ -1,8 +1,9 @@
-import { handleUpload } from '@vercel/blob/client';
+import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client';
 import { getSessionFromRequest } from '../_lib/store.js';
 
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const VIDEO_TYPES = ['video/mp4', 'video/webm'];
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -10,39 +11,43 @@ export default async function handler(req, res) {
   }
 
   try {
+    const auth = await getSessionFromRequest(req);
+    if (!auth?.session) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const body = await readJsonBody(req);
+    if (body?.type !== 'blob.generate-client-token') {
+      return res.status(400).json({
+        error: 'Invalid upload event',
+        details: 'Expected blob.generate-client-token',
+      });
+    }
 
-    const jsonResponse = await handleUpload({
-      body,
-      request: req,
+    const pathname = String(body?.payload?.pathname || '').trim();
+    if (!pathname) {
+      return res.status(400).json({
+        error: 'Invalid upload payload',
+        details: 'Missing pathname',
+      });
+    }
+
+    const payload = parseClientPayload(body?.payload?.clientPayload);
+    const allowedContentTypes = payload.kind === 'video' ? VIDEO_TYPES : IMAGE_TYPES;
+
+    const clientToken = await generateClientTokenFromReadWriteToken({
       token: process.env.BLOB_READ_WRITE_TOKEN,
-      onBeforeGenerateToken: async (_pathname, clientPayload) => {
-        const auth = await getSessionFromRequest(req);
-        if (!auth?.session) {
-          throw new Error('Unauthorized');
-        }
-
-        const payload = parseClientPayload(clientPayload);
-        const allowedContentTypes = payload.kind === 'video' ? VIDEO_TYPES : IMAGE_TYPES;
-
-        return {
-          allowedContentTypes,
-          maximumSizeInBytes: 10 * 1024 * 1024,
-          addRandomSuffix: true,
-          tokenPayload: JSON.stringify({
-            userId: auth.session.userId,
-            kind: payload.kind || 'unknown',
-          }),
-        };
-      },
+      pathname,
+      allowedContentTypes,
+      maximumSizeInBytes: MAX_FILE_SIZE_BYTES,
+      addRandomSuffix: true,
     });
 
-    return res.status(200).json(jsonResponse);
+    return res.status(200).json({ clientToken });
   } catch (error) {
-    const status = error?.message === 'Unauthorized' ? 401 : 500;
     console.error('Blob upload token error:', error);
-    return res.status(status).json({
-      error: status === 401 ? 'Unauthorized' : 'Blob upload token failed',
+    return res.status(500).json({
+      error: 'Blob upload token failed',
       details: error?.message || 'Unknown error',
     });
   }
