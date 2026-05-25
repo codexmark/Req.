@@ -15,28 +15,42 @@
   <body>
     <header class="global-nav">
       <div class="global-nav__topbar">
-        <div class="global-nav__brand">
-          <span class="brand-mark small">R</span>
-          <div>
-            <span class="global-nav__title">Req. Codex</span>
-            <span class="global-nav__subtitle">Modulo de elicitacao: entendimento, consolidacao e geracao de requisitos.</span>
+        <div class="global-nav__brand-wrap">
+          <button
+            class="nav-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="false"
+            aria-controls="global-nav-drawer"
+            aria-label="Abrir menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div class="global-nav__brand">
+            <span class="brand-mark small">R</span>
+            <div>
+              <span class="global-nav__title">Req. Codex</span>
+              <span class="global-nav__subtitle">Elicitacao para entendimento, consolidacao e requisitos.</span>
+            </div>
           </div>
         </div>
         <div class="global-nav__actions">
-          <span class="module-badge">Modulo ativo: Elicitacao</span>
+          <span class="module-badge">Elicitacao</span>
           <button class="button button--ghost button--nav" type="button" data-logout>Sair</button>
         </div>
       </div>
-      <div class="global-nav__meta">
-        <span class="module-caption">Entendimentos -> requisitos -> exportacao</span>
+      <div id="global-nav-drawer" class="global-nav__drawer" data-nav-drawer hidden>
+        <div class="global-nav__meta">
+          <span class="module-caption">Produto &gt; Elicitacao &gt; Entendimento e requisitos</span>
+        </div>
+        <nav class="global-nav__links" aria-label="Navegacao principal">
+          <a class="is-active" href="../elicitation" aria-current="page">Elicitacao</a>
+          <a href="../cards">Cards</a>
+          <a data-admin-only href="../users">Usuarios</a>
+        </nav>
       </div>
-      <nav class="global-nav__links" aria-label="Navegacao principal">
-        <a class="is-active" href="../elicitation">Elicitacao</a>
-        <a href="../cards">Cards</a>
-        <a data-admin-only href="../users">Usuarios</a>
-        <a href="#requirements">Requisitos</a>
-        <a href="#understanding">Entendimento</a>
-      </nav>
     </header>
 
     <div class="app-shell">
@@ -45,6 +59,11 @@
       </aside>
 
       <main class="main-content workspace">
+        <nav class="module-subnav" aria-label="Secoes do modulo elicitacao">
+          <a class="is-active" href="#understanding">Entendimento</a>
+          <a href="#requirements">Requisitos</a>
+        </nav>
+
         <header class="hero surface-card">
           <div class="hero__content">
             <div class="hero__brand">

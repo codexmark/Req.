@@ -14,24 +14,43 @@
   </head>
   <body>
     <header class="global-nav">
-      <div class="global-nav__brand">
-        <span class="brand-mark small">C</span>
-        <div>
-          <span class="global-nav__title">Req. Codex</span>
-          <span class="global-nav__subtitle">Modulo de cards: estruturacao, revisao e envio de cards para webhook.</span>
+      <div class="global-nav__topbar">
+        <div class="global-nav__brand-wrap">
+          <button
+            class="nav-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="false"
+            aria-controls="global-nav-drawer"
+            aria-label="Abrir menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div class="global-nav__brand">
+            <span class="brand-mark small">C</span>
+            <div>
+              <span class="global-nav__title">Req. Codex</span>
+              <span class="global-nav__subtitle">Cards operacionais com ownership, triagem e webhook.</span>
+            </div>
+          </div>
+        </div>
+        <div class="global-nav__actions">
+          <span class="module-badge">Cards</span>
+          <button class="button ghost button--nav" type="button" data-logout>Sair</button>
         </div>
       </div>
-      <div class="global-nav__meta">
-        <span class="module-badge">Modulo ativo: Cards</span>
-        <span class="module-caption">Formulario -> revisao -> Discord</span>
+      <div id="global-nav-drawer" class="global-nav__drawer" data-nav-drawer hidden>
+        <div class="global-nav__meta">
+          <span class="module-caption">Produto &gt; Cards &gt; Triagem e envio</span>
+        </div>
+        <nav class="global-nav__links" aria-label="Navegacao principal">
+          <a href="../elicitation">Elicitacao</a>
+          <a class="is-active" href="../cards" aria-current="page">Cards</a>
+          <a data-admin-only href="../users">Usuarios</a>
+        </nav>
       </div>
-      <nav class="global-nav__links" aria-label="Navegação principal">
-        <a href="../elicitation">Elicitacao</a>
-        <a class="is-active" href="../cards">Cards</a>
-        <a data-admin-only href="../users">Usuarios</a>
-        <a href="#card-form">Formulario</a>
-        <a href="#created-cards">Fila de cards</a>
-      </nav>
     </header>
 
     <div class="app-shell">
@@ -40,6 +59,11 @@
       </aside>
 
       <main class="main-content">
+        <nav class="module-subnav" aria-label="Secoes do modulo cards">
+          <a class="is-active" href="#card-form">Formulario</a>
+          <a href="#created-cards">Fila</a>
+        </nav>
+
         <header class="topbar">
           <div>
             <p class="eyebrow">Modulo Cards</p>
@@ -48,10 +72,6 @@
               Monte cards operacionais completos, mantenha ownership tecnico e envie atualizacoes
               diretamente para o Discord.
             </p>
-          </div>
-          <div class="topbar-actions">
-            <a class="button ghost" href="../elicitation">Ir para elicitacao</a>
-            <button class="button ghost" type="button" data-logout>Sair</button>
           </div>
         </header>
 

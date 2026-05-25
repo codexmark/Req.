@@ -63,27 +63,42 @@ a { color: inherit; text-decoration: none; }
   z-index: 30;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px 10px;
+  gap: 12px;
+  padding: 14px 14px 12px;
   backdrop-filter: blur(18px);
-  background: rgba(8, 13, 24, 0.68);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(6, 11, 22, 0.82);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  box-shadow: 0 12px 30px rgba(2, 8, 23, 0.16);
 }
 
 .global-nav__topbar {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
 }
 
+.global-nav__drawer,
+.global-nav__brand-wrap,
 .global-nav__brand,
-.global-nav__links {
+.global-nav__links,
+.module-subnav {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.global-nav__drawer {
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.global-nav__brand-wrap {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .global-nav__actions {
@@ -105,6 +120,48 @@ a { color: inherit; text-decoration: none; }
 .global-nav__meta {
   display: grid;
   gap: 4px;
+}
+
+.nav-toggle {
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(10, 17, 32, 0.55);
+  color: var(--text);
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.nav-toggle:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.nav-toggle span {
+  width: 16px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
 }
 
 .global-nav__title {
@@ -139,19 +196,15 @@ a { color: inherit; text-decoration: none; }
 }
 
 .global-nav__links {
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  max-width: 100%;
-  padding-bottom: 2px;
-  scrollbar-width: thin;
+  flex-wrap: wrap;
 }
 
 .global-nav__links a {
-  padding: 8px 10px;
+  padding: 8px 12px;
   border-radius: 999px;
   color: var(--muted);
   font-size: 0.88rem;
+  font-weight: 600;
   transition: 160ms ease;
 }
 
@@ -168,6 +221,39 @@ a { color: inherit; text-decoration: none; }
 
 .button--nav {
   padding: 8px 12px;
+}
+
+.module-subnav {
+  position: sticky;
+  top: 96px;
+  z-index: 20;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 16px;
+  background: rgba(10, 17, 32, 0.62);
+  backdrop-filter: blur(14px);
+}
+
+.module-subnav a {
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  transition: 160ms ease;
+}
+
+.module-subnav a:hover {
+  color: var(--text);
+  background: rgba(55, 183, 165, 0.12);
+}
+
+.module-subnav a.is-active {
+  color: var(--text);
+  background: rgba(55, 183, 165, 0.16);
+  border: 1px solid rgba(55, 183, 165, 0.24);
 }
 
 .app-shell {
@@ -670,10 +756,16 @@ input:focus, textarea:focus, select:focus {
 }
 
 @media (min-width: 768px) {
+  .nav-toggle { display: none; }
+
   .global-nav {
-    flex-direction: row;
-    align-items: flex-start;
     padding: 18px 22px 14px;
+  }
+
+  .global-nav__drawer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .app-shell { padding: 20px 20px 24px; }
@@ -703,7 +795,29 @@ input:focus, textarea:focus, select:focus {
     grid-template-columns: 1fr;
   }
 
-  .global-nav__topbar {
-    flex-direction: column;
+  .global-nav__actions .button--nav {
+    display: none;
+  }
+
+  .global-nav__drawer[hidden] {
+    display: none;
+  }
+
+  .global-nav__drawer {
+    padding-top: 4px;
+  }
+
+  .global-nav__links {
+    display: grid;
+    gap: 8px;
+  }
+
+  .global-nav__links a,
+  .module-subnav a {
+    width: 100%;
+  }
+
+  .module-subnav {
+    top: 84px;
   }
 }

@@ -47,7 +47,48 @@
       });
     });
 
+    setupResponsiveNav();
+
     return data;
+  }
+
+  function setupResponsiveNav() {
+    const toggle = document.querySelector('[data-nav-toggle]');
+    const drawer = document.querySelector('[data-nav-drawer]');
+    if (!toggle || !drawer) return;
+
+    const mobileQuery = window.matchMedia('(max-width: 980px)');
+
+    const syncNav = () => {
+      const isMobile = mobileQuery.matches;
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      drawer.hidden = isMobile ? !expanded : false;
+      if (!isMobile) {
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    };
+
+    toggle.addEventListener('click', () => {
+      const nextExpanded = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(nextExpanded));
+      syncNav();
+    });
+
+    drawer.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (!mobileQuery.matches) return;
+        toggle.setAttribute('aria-expanded', 'false');
+        syncNav();
+      });
+    });
+
+    if (mobileQuery.addEventListener) {
+      mobileQuery.addEventListener('change', syncNav);
+    } else {
+      mobileQuery.addListener(syncNav);
+    }
+
+    syncNav();
   }
 
   async function getUsers() {

@@ -14,34 +14,57 @@
   </head>
   <body>
     <header class="global-nav">
-      <div class="global-nav__brand">
-        <span class="brand-mark small">U</span>
-        <div>
-          <span class="global-nav__title">Req. Codex</span>
-          <span class="global-nav__subtitle">Modulo administrativo para CRUD basico de usuarios.</span>
+      <div class="global-nav__topbar">
+        <div class="global-nav__brand-wrap">
+          <button
+            class="nav-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="false"
+            aria-controls="global-nav-drawer"
+            aria-label="Abrir menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div class="global-nav__brand">
+            <span class="brand-mark small">U</span>
+            <div>
+              <span class="global-nav__title">Req. Codex</span>
+              <span class="global-nav__subtitle">Area administrativa para gestao de usuarios e ownership.</span>
+            </div>
+          </div>
+        </div>
+        <div class="global-nav__actions">
+          <span class="module-badge">Admin</span>
+          <button class="button ghost button--nav" type="button" data-logout>Sair</button>
         </div>
       </div>
-      <div class="global-nav__meta">
-        <span class="module-badge">Modulo ativo: Usuarios</span>
-        <span class="module-caption">Admin -> contas -> ownership</span>
+      <div id="global-nav-drawer" class="global-nav__drawer" data-nav-drawer hidden>
+        <div class="global-nav__meta">
+          <span class="module-caption">Produto &gt; Admin &gt; Usuarios</span>
+        </div>
+        <nav class="global-nav__links" aria-label="Navegacao principal">
+          <a href="../elicitation">Elicitacao</a>
+          <a href="../cards">Cards</a>
+          <a class="is-active" href="../users" aria-current="page">Usuarios</a>
+        </nav>
       </div>
-      <nav class="global-nav__links" aria-label="Navegacao principal">
-        <a href="../elicitation">Elicitacao</a>
-        <a href="../cards">Cards</a>
-        <a class="is-active" href="../users">Usuarios</a>
-      </nav>
     </header>
 
     <div class="app-shell">
       <main class="main-content">
+        <nav class="module-subnav" aria-label="Secoes do modulo usuarios">
+          <a class="is-active" href="#user-form">Cadastro</a>
+          <a href="#users-list">Base</a>
+        </nav>
+
         <header class="topbar">
           <div>
             <p class="eyebrow">Usuarios</p>
             <h2>CRUD basico de usuarios</h2>
             <p class="section-copy">Gerencie nomes, email, senha, papel e ativacao dos usuarios do sistema.</p>
-          </div>
-          <div class="topbar-actions">
-            <button class="button ghost" type="button" data-logout>Sair</button>
           </div>
         </header>
 
