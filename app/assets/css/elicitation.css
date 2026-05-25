@@ -83,7 +83,7 @@ a { color: inherit; text-decoration: none; }
 .global-nav__brand-wrap,
 .global-nav__brand,
 .global-nav__links,
-.module-subnav {
+.global-nav__local {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -177,24 +177,6 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.45;
 }
 
-.module-badge {
-  display: inline-flex;
-  width: fit-content;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: #b8fff5;
-  font-size: 0.74rem;
-  font-weight: 700;
-}
-
-.module-caption {
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-
 .global-nav__links {
   flex-wrap: wrap;
 }
@@ -223,37 +205,32 @@ a { color: inherit; text-decoration: none; }
   padding: 8px 12px;
 }
 
-.module-subnav {
-  position: sticky;
-  top: 96px;
-  z-index: 20;
+.global-nav__local {
   flex-wrap: wrap;
   gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 16px;
-  background: rgba(10, 17, 32, 0.62);
-  backdrop-filter: blur(14px);
 }
 
-.module-subnav a {
-  padding: 8px 12px;
+.global-nav__local-title {
+  width: 100%;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.global-nav__local a {
+  padding: 7px 10px;
   border-radius: 999px;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 700;
   transition: 160ms ease;
 }
 
-.module-subnav a:hover {
+.global-nav__local a:hover {
   color: var(--text);
   background: rgba(55, 183, 165, 0.12);
-}
-
-.module-subnav a.is-active {
-  color: var(--text);
-  background: rgba(55, 183, 165, 0.16);
-  border: 1px solid rgba(55, 183, 165, 0.24);
 }
 
 .app-shell {
@@ -262,28 +239,6 @@ a { color: inherit; text-decoration: none; }
   gap: 14px;
   min-height: calc(100vh - 144px);
   padding: 14px 10px 28px;
-}
-
-.sidebar {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  position: static;
-  padding: 0;
-}
-
-.autosave-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(74, 222, 128, 0.12);
-  color: #a7f3d0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  width: fit-content;
 }
 
 .main-content,
@@ -320,7 +275,7 @@ a { color: inherit; text-decoration: none; }
 
 .hero__content {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.7fr);
+  grid-template-columns: 1fr;
   gap: 18px;
   align-items: stretch;
 }
@@ -384,54 +339,6 @@ h3 { font-size: 0.95rem; }
   max-width: 72ch;
   line-height: 1.7;
   color: var(--muted);
-}
-
-.hero__highlights {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.hero__highlight {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  background: rgba(10, 17, 32, 0.52);
-  color: #cfe5ff;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.hero__summary {
-  display: grid;
-  align-content: start;
-  gap: 10px;
-  padding: 18px;
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  background: linear-gradient(180deg, rgba(55, 183, 165, 0.1), rgba(24, 35, 58, 0.66));
-}
-
-.hero__summary-label {
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.hero__summary strong {
-  font-size: 1rem;
-  line-height: 1.4;
-}
-
-.hero__summary p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.65;
 }
 
 .hero__actions,
@@ -768,6 +675,9 @@ input:focus, textarea:focus, select:focus {
     justify-content: space-between;
   }
 
+  .global-nav__links { display: flex; }
+  .global-nav__local { display: none; }
+
   .app-shell { padding: 20px 20px 24px; }
 
   .panel__heading {
@@ -813,11 +723,7 @@ input:focus, textarea:focus, select:focus {
   }
 
   .global-nav__links a,
-  .module-subnav a {
+  .global-nav__local a {
     width: 100%;
-  }
-
-  .module-subnav {
-    top: 84px;
   }
 }

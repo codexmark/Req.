@@ -37,59 +37,37 @@
           </div>
         </div>
         <div class="global-nav__actions">
-          <span class="module-badge">Elicitacao</span>
           <button class="button button--ghost button--nav" type="button" data-logout>Sair</button>
         </div>
       </div>
       <div id="global-nav-drawer" class="global-nav__drawer" data-nav-drawer hidden>
-        <div class="global-nav__meta">
-          <span class="module-caption">Produto &gt; Elicitacao &gt; Entendimento e requisitos</span>
-        </div>
         <nav class="global-nav__links" aria-label="Navegacao principal">
           <a class="is-active" href="../elicitation" aria-current="page">Elicitacao</a>
           <a href="../cards">Cards</a>
           <a data-admin-only href="../users">Usuarios</a>
         </nav>
+        <div class="global-nav__local">
+          <span class="global-nav__local-title">Nesta pagina</span>
+          <a href="#understanding">Entendimento</a>
+          <a href="#requirements">Requisitos</a>
+        </div>
       </div>
     </header>
 
     <div class="app-shell">
-      <aside class="sidebar">
-        <span id="autosave-indicator" class="autosave-badge">Auto-save ativo</span>
-      </aside>
-
       <main class="main-content workspace">
-        <nav class="module-subnav" aria-label="Secoes do modulo elicitacao">
-          <a class="is-active" href="#understanding">Entendimento</a>
-          <a href="#requirements">Requisitos</a>
-        </nav>
-
         <header class="hero surface-card">
           <div class="hero__content">
             <div class="hero__brand">
               <span class="brand-mark">R</span>
               <div class="hero__copyblock">
-                <p class="eyebrow">Requirements Studio</p>
-                <h1>Elicitacao orientada para gerar requisitos com contexto e ownership</h1>
+                <p class="eyebrow">Elicitacao</p>
+                <h1>Entender, organizar e gerar requisitos</h1>
                 <p class="hero__copy">
-                  Capture a conversa sem travas, consolide o entendimento em blocos objetivos e
-                  transforme a sessao em requisitos revisaveis com contexto, criterio e responsavel.
+                  Registre a conversa, consolide o entendimento e gere requisitos revisaveis.
                 </p>
-                <div class="hero__highlights">
-                  <span class="hero__highlight">Entendimentos estruturados</span>
-                  <span class="hero__highlight">Requisitos com ownership</span>
-                  <span class="hero__highlight">Exportacao pronta para backlog</span>
-                </div>
               </div>
             </div>
-            <aside class="hero__summary">
-              <span class="hero__summary-label">Fluxo do modulo</span>
-              <strong>Entender, consolidar e transformar em requisito rastreavel.</strong>
-              <p>
-                Este modulo concentra a sessao de descoberta e gera a saida pronta para o proximo
-                passo do processo.
-              </p>
-            </aside>
           </div>
           <div class="hero__actions">
             <a class="button button--ghost" href="../cards">Abrir modulo cards</a>
@@ -104,10 +82,7 @@
               <p class="eyebrow">Fluxo</p>
               <h2>Menos ritual, mais throughput</h2>
             </div>
-            <div class="status-cluster">
-              <span class="badge badge--live" id="autosave-indicator">Auto-save ativo</span>
-              <span class="badge" id="session-health">0 requisitos gerados</span>
-            </div>
+            <span class="badge" id="session-health">0 requisitos gerados</span>
           </div>
 
           <div class="metric-strip">
@@ -207,12 +182,11 @@
 
             <aside class="capture-aside">
               <div class="note-card">
-                <h3>Sugestao de condução</h3>
+                <h3>Como usar</h3>
                 <ol>
                   <li>Escreva a conversa em linguagem natural.</li>
                   <li>Clique em organizar para quebrar o entendimento.</li>
-                  <li>Revise os blocos sem formalizar demais.</li>
-                  <li>Gere os requisitos quando o contexto estiver bom.</li>
+                  <li>Revise os blocos e gere os requisitos.</li>
                 </ol>
               </div>
               <div class="note-card">

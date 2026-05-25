@@ -37,57 +37,37 @@
           </div>
         </div>
         <div class="global-nav__actions">
-          <span class="module-badge">Cards</span>
           <button class="button ghost button--nav" type="button" data-logout>Sair</button>
         </div>
       </div>
       <div id="global-nav-drawer" class="global-nav__drawer" data-nav-drawer hidden>
-        <div class="global-nav__meta">
-          <span class="module-caption">Produto &gt; Cards &gt; Triagem e envio</span>
-        </div>
         <nav class="global-nav__links" aria-label="Navegacao principal">
           <a href="../elicitation">Elicitacao</a>
           <a class="is-active" href="../cards" aria-current="page">Cards</a>
           <a data-admin-only href="../users">Usuarios</a>
         </nav>
+        <div class="global-nav__local">
+          <span class="global-nav__local-title">Nesta pagina</span>
+          <a href="#card-form">Formulario</a>
+          <a href="#created-cards">Fila de cards</a>
+        </div>
       </div>
     </header>
 
     <div class="app-shell">
-      <aside class="sidebar">
-        <span id="autosave-indicator" class="autosave-badge">Auto-save</span>
-      </aside>
-
       <main class="main-content">
-        <nav class="module-subnav" aria-label="Secoes do modulo cards">
-          <a class="is-active" href="#card-form">Formulario</a>
-          <a href="#created-cards">Fila</a>
-        </nav>
-
         <header class="topbar">
           <div>
-            <p class="eyebrow">Modulo Cards</p>
-            <h2>Criador de cards com webhook dedicado</h2>
-            <p class="section-copy">
-              Monte cards operacionais completos, mantenha ownership tecnico e envie atualizacoes
-              diretamente para o Discord.
-            </p>
+            <p class="eyebrow">Cards</p>
+            <h2>Criar e enviar cards</h2>
           </div>
         </header>
 
         <section class="surface-card card-creator-card">
           <div class="section-title-row">
             <div>
-              <p class="eyebrow">Cards</p>
-              <h2>Formulario dedicado ao fluxo de cards</h2>
-              <p class="section-copy">
-                Cada card pode ser criado, revisado, editado e reenviado mantendo criterios de aceite,
-                regra de negocio e responsavel tecnico no mesmo lugar.
-              </p>
-            </div>
-            <div class="button-stack">
-              <span class="pill">Webhook Discord</span>
-              <span class="pill subtle">Persistencia local</span>
+              <p class="eyebrow">Formulario</p>
+              <h2>Dados do card</h2>
             </div>
           </div>
 
@@ -192,14 +172,7 @@
                 <div>
                   <p class="eyebrow">Evidências</p>
                   <h3 id="evidence-section-title">Fotos e vídeo vinculados ao card</h3>
-                  <p class="section-copy">
-                    Armazenadas no navegador até o envio. Após sincronizar com o Discord, o registro
-                    local continua só para reedição rápida deste navegador.
-                  </p>
-                </div>
-                <div class="button-stack">
-                  <span class="pill subtle">Até 3 fotos</span>
-                  <span class="pill subtle">1 vídeo</span>
+                  <p class="section-copy">Use anexos apenas quando ajudarem a explicar o card.</p>
                 </div>
               </div>
 
@@ -208,7 +181,7 @@
                   <div class="evidence-card__head">
                     <div>
                       <strong>Fotos da evidência</strong>
-                      <p class="section-copy">PNG, JPG ou WEBP de até 400 KB cada.</p>
+                      <p class="section-copy">PNG, JPG ou WEBP.</p>
                     </div>
                     <button id="add-photo-trigger" type="button" class="button secondary">
                       Selecionar fotos
@@ -231,7 +204,7 @@
                   <div class="evidence-card__head">
                     <div>
                       <strong>Vídeo da evidência</strong>
-                      <p class="section-copy">MP4 ou WEBM de até 1.8 MB.</p>
+                      <p class="section-copy">MP4 ou WEBM.</p>
                     </div>
                     <button id="add-video-trigger" type="button" class="button secondary">
                       Selecionar vídeo
