@@ -138,6 +138,8 @@ function normalizeStoredCard(card) {
   return {
     ...card,
     localId: card.localId || crypto.randomUUID(),
+    cardId: card.cardId || createCardIdentifier(),
+    discordMessageId: card.discordMessageId || null,
     criteriosAceite: Array.isArray(card.criteriosAceite) ? card.criteriosAceite : [],
     evidenciasFotos,
     evidenciasVideos,
@@ -181,12 +183,17 @@ async function sendToDiscord(card, action = 'create', cardIndex = null) {
       throw new Error(`API error: ${response.status}`);
     }
 
+    const payload = await response.json().catch(() => ({}));
+
     if (action === 'delete') {
       setFeedback('Card removido e webhook notificado.', 'success');
     } else {
       setFeedback('Card sincronizado com o webhook do Discord.', 'success');
     }
-    return true;
+    return {
+      success: true,
+      discordMessageId: payload.discordMessageId || null,
+    };
   } catch (error) {
     console.error('Erro ao enviar para Discord:', error);
     setFeedback(
@@ -195,7 +202,10 @@ async function sendToDiscord(card, action = 'create', cardIndex = null) {
         : 'Nao foi possivel notificar o Discord. O card foi salvo e as evidencias temporarias permanecem disponiveis para retry.',
       'error'
     );
-    return false;
+    return {
+      success: false,
+      discordMessageId: null,
+    };
   }
 }
 
@@ -225,6 +235,12 @@ function renderCreatedCards() {
         <button class="button danger-light delete-card" data-id="${index}">Excluir</button>
       </div>
       <h3>Card ${index + 1}</h3>
+      <div class="card-section">
+        <strong>ID do Card:</strong> <p>${escapeHtml(card.cardId || 'N/A')}</p>
+      </div>
+      <div class="card-section">
+        <strong>Mensagem Discord:</strong> <p>${escapeHtml(card.discordMessageId || 'Ainda não vinculada')}</p>
+      </div>
       <div class="card-section">
         <strong>Contexto:</strong> <p>${escapeHtml(card.contexto || 'N/A')}</p>
       </div>
@@ -383,6 +399,8 @@ async function onSubmitCard(event) {
   const localId = editingCardId !== null ? createdCards[editingCardId].localId : crypto.randomUUID();
   const card = {
     localId,
+    cardId: editingCardId !== null ? createdCards[editingCardId].cardId : createCardIdentifier(),
+    discordMessageId: editingCardId !== null ? createdCards[editingCardId].discordMessageId || null : null,
     tipo: String(formData.get('tipo') || '').trim(),
     prioridade: String(formData.get('prioridade') || '').trim(),
     origemDemanda: String(formData.get('origemDemanda') || '').trim(),
@@ -420,10 +438,13 @@ async function onSubmitCard(event) {
   }
 
   persistCards();
-  const sent = await sendToDiscord(card, editingCardId !== null ? 'update' : 'create', cardIndex);
+  const result = await sendToDiscord(card, editingCardId !== null ? 'update' : 'create', cardIndex);
 
-  if (sent) {
-    createdCards[cardIndex] = stripTemporaryBlobRefs(card);
+  if (result.success) {
+    createdCards[cardIndex] = {
+      ...stripTemporaryBlobRefs(card),
+      discordMessageId: result.discordMessageId || card.discordMessageId || null,
+    };
     persistCards();
   }
 
@@ -604,6 +625,10 @@ function safeLoadCards() {
     console.error('Falha ao carregar cards locais:', error);
     return [];
   }
+}
+
+function createCardIdentifier() {
+  return `CRD-${Date.now().toString(36).toUpperCase()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 }
 
 function persistCards() {

@@ -18,10 +18,10 @@ export default async function handler(req, res) {
 
     const payload = await readRequestPayload(req);
     const { card = {}, action = 'create', cardIndex = null, files = {}, media = {} } = payload;
-    const discordRequest = await buildDiscordRequest({ card, action, cardIndex, files, media });
+    const discordRequest = await buildDiscordRequest({ webhookUrl, card, action, cardIndex, files, media });
 
-    const discordResponse = await fetch(webhookUrl, {
-      method: 'POST',
+    const discordResponse = await fetch(discordRequest.url, {
+      method: discordRequest.method,
       headers: discordRequest.headers,
       body: discordRequest.body,
     });
@@ -36,7 +36,11 @@ export default async function handler(req, res) {
       await cleanupBlobTargets(discordRequest.cleanupTargets);
     }
 
-    return res.status(200).json({ success: true });
+    const discordPayload = await parseDiscordResponse(discordResponse);
+    return res.status(200).json({
+      success: true,
+      discordMessageId: discordPayload?.id || card?.discordMessageId || null,
+    });
   } catch (error) {
     console.error('Internal webhook error:', error);
     return res.status(500).json({ error: 'Internal error', details: error?.message || 'Unknown error' });
@@ -96,14 +100,20 @@ function normalizeFiles(files) {
   };
 }
 
-async function buildDiscordRequest({ card, action, cardIndex, files, media }) {
+async function buildDiscordRequest({ webhookUrl, card, action, cardIndex, files, media }) {
   const embed = buildDiscordEmbed({ card, action, cardIndex });
   const cleanupTargets = collectCleanupTargets(media);
+  const webhook = parseWebhookUrl(webhookUrl);
 
   if (action === 'delete') {
+    if (!card?.discordMessageId) {
+      throw new Error('Card sem discordMessageId para exclusão.');
+    }
     return {
-      body: JSON.stringify({ embeds: [embed] }),
-      headers: { 'Content-Type': 'application/json' },
+      url: `${webhook.messagesUrl}/${card.discordMessageId}`,
+      method: 'DELETE',
+      body: undefined,
+      headers: undefined,
       cleanupTargets: [],
     };
   }
@@ -120,6 +130,11 @@ async function buildDiscordRequest({ card, action, cardIndex, files, media }) {
 
   if (!hasAttachments) {
     return {
+      url:
+        action === 'update' && card?.discordMessageId
+          ? `${webhook.messagesUrl}/${card.discordMessageId}`
+          : `${webhook.executeUrl}?wait=true`,
+      method: action === 'update' && card?.discordMessageId ? 'PATCH' : 'POST',
       body: JSON.stringify({ embeds: [embed] }),
       headers: { 'Content-Type': 'application/json' },
       cleanupTargets: [],
@@ -181,6 +196,11 @@ async function buildDiscordRequest({ card, action, cardIndex, files, media }) {
   );
 
   return {
+    url:
+      action === 'update' && card?.discordMessageId
+        ? `${webhook.messagesUrl}/${card.discordMessageId}`
+        : `${webhook.executeUrl}?wait=true`,
+    method: action === 'update' && card?.discordMessageId ? 'PATCH' : 'POST',
     body: formData,
     headers: undefined,
     cleanupTargets,
@@ -207,9 +227,16 @@ function buildDiscordEmbed({ card, action, cardIndex }) {
   return {
     title: titles[action] || 'Card Modificado',
     color: colors[action] || 0x37b7a5,
+    footer:
+      action !== 'delete' && card?.cardId
+        ? {
+            text: `Card ID: ${card.cardId}`,
+          }
+        : undefined,
     fields:
       action !== 'delete'
         ? [
+            { name: 'ID do Card', value: truncateField(card?.cardId) || 'N/A', inline: true },
             { name: 'Tipo', value: truncateField(card?.tipo) || 'N/A', inline: true },
             { name: 'Prioridade', value: truncateField(card?.prioridade) || 'N/A', inline: true },
             { name: 'Origem da Demanda', value: truncateField(card?.origemDemanda) || 'N/A', inline: true },
@@ -305,6 +332,34 @@ async function cleanupBlobTargets(targets) {
     await del(targets);
   } catch (error) {
     console.error('Falha ao limpar blobs temporários:', error);
+  }
+}
+
+function parseWebhookUrl(value) {
+  const url = new URL(value);
+  const segments = url.pathname.split('/').filter(Boolean);
+  const webhookIndex = segments.findIndex((segment) => segment === 'webhooks');
+  const webhookId = segments[webhookIndex + 1];
+  const webhookToken = segments[webhookIndex + 2];
+
+  if (!webhookId || !webhookToken) {
+    throw new Error('DISCORD_WEBHOOK_URL inválida.');
+  }
+
+  return {
+    executeUrl: `${url.origin}/api/webhooks/${webhookId}/${webhookToken}`,
+    messagesUrl: `${url.origin}/api/webhooks/${webhookId}/${webhookToken}/messages`,
+  };
+}
+
+async function parseDiscordResponse(response) {
+  if (response.status === 204) return null;
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
   }
 }
 
