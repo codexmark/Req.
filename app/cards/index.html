@@ -132,6 +132,69 @@
                 placeholder="Observações adicionais sobre o card."
               ></textarea>
             </label>
+            <section class="full-span evidence-section" aria-labelledby="evidence-section-title">
+              <div class="evidence-section__header">
+                <div>
+                  <p class="eyebrow">Evidências</p>
+                  <h3 id="evidence-section-title">Fotos e vídeo vinculados ao card</h3>
+                  <p class="section-copy">
+                    Armazenadas no navegador até o envio. Após sincronizar com o Discord, o registro
+                    local continua só para reedição rápida deste navegador.
+                  </p>
+                </div>
+                <div class="button-stack">
+                  <span class="pill subtle">Até 3 fotos</span>
+                  <span class="pill subtle">1 vídeo</span>
+                </div>
+              </div>
+
+              <div class="evidence-grid">
+                <div class="evidence-card">
+                  <div class="evidence-card__head">
+                    <div>
+                      <strong>Fotos da evidência</strong>
+                      <p class="section-copy">PNG, JPG ou WEBP de até 400 KB cada.</p>
+                    </div>
+                    <button id="add-photo-trigger" type="button" class="button secondary">
+                      Selecionar fotos
+                    </button>
+                  </div>
+                  <input
+                    id="photo-evidence-input"
+                    class="sr-only"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    multiple
+                  />
+                  <div id="photo-evidence-empty" class="evidence-empty">
+                    Nenhuma foto adicionada ainda.
+                  </div>
+                  <div id="photo-evidence-list" class="evidence-preview-grid"></div>
+                </div>
+
+                <div class="evidence-card">
+                  <div class="evidence-card__head">
+                    <div>
+                      <strong>Vídeo da evidência</strong>
+                      <p class="section-copy">MP4 ou WEBM de até 1.8 MB.</p>
+                    </div>
+                    <button id="add-video-trigger" type="button" class="button secondary">
+                      Selecionar vídeo
+                    </button>
+                  </div>
+                  <input
+                    id="video-evidence-input"
+                    class="sr-only"
+                    type="file"
+                    accept="video/mp4,video/webm"
+                  />
+                  <div id="video-evidence-empty" class="evidence-empty">
+                    Nenhum vídeo adicionado ainda.
+                  </div>
+                  <div id="video-evidence-list" class="video-preview-list"></div>
+                </div>
+              </div>
+            </section>
             <p id="card-feedback" class="form-feedback full-span" aria-live="polite"></p>
             <div class="action-row full-span">
               <button id="create-card" class="button primary">Criar Card</button>

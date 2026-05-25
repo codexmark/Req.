@@ -500,6 +500,118 @@ input:focus, textarea:focus, select:focus {
 .form-feedback.is-error { color: #fecaca; }
 .form-feedback.is-info { color: #bfdbfe; }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.evidence-section {
+  display: grid;
+  gap: 14px;
+}
+
+.evidence-section__header,
+.evidence-card__head,
+.evidence-item__meta,
+.video-preview-card__meta,
+.media-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.evidence-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.evidence-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: rgba(24, 35, 58, 0.72);
+}
+
+.evidence-empty {
+  padding: 18px 14px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--line-strong);
+  color: var(--muted);
+  text-align: center;
+  background: rgba(10, 17, 32, 0.38);
+}
+
+.evidence-preview-grid,
+.video-preview-list {
+  display: grid;
+  gap: 12px;
+}
+
+.evidence-preview-grid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.evidence-item,
+.video-preview-card {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: rgba(10, 17, 32, 0.55);
+}
+
+.evidence-item img,
+.video-preview-card video {
+  width: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+  background: rgba(8, 14, 26, 0.9);
+}
+
+.evidence-item img {
+  aspect-ratio: 4 / 3;
+}
+
+.video-preview-card video {
+  max-height: 220px;
+}
+
+.evidence-item__meta,
+.video-preview-card__meta {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.evidence-item__name {
+  color: var(--text);
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.evidence-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 .interview-card .prompt-card,
 .subpanel,
 .artifact-summary,
@@ -797,6 +909,12 @@ input:focus, textarea:focus, select:focus {
   .global-nav__links { display: flex; }
 
   .script-card__header { flex-direction: row; align-items: center; }
+}
+
+@media (max-width: 767px) {
+  .evidence-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .add-criteria-row input {
