@@ -1,5 +1,8 @@
 import formidable from 'formidable';
 import fs from 'node:fs/promises';
+import { del } from '@vercel/blob';
+
+const DISCORD_MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,16 +17,13 @@ export default async function handler(req, res) {
     }
 
     const payload = await readRequestPayload(req);
-    const { card = {}, action = 'create', cardIndex = null, files = {} } = payload;
-    const discordPayload = await buildDiscordPayload({ card, action, cardIndex, files });
+    const { card = {}, action = 'create', cardIndex = null, files = {}, media = {} } = payload;
+    const discordRequest = await buildDiscordRequest({ card, action, cardIndex, files, media });
 
     const discordResponse = await fetch(webhookUrl, {
       method: 'POST',
-      headers:
-        typeof discordPayload === 'string'
-          ? { 'Content-Type': 'application/json' }
-          : undefined,
-      body: discordPayload,
+      headers: discordRequest.headers,
+      body: discordRequest.body,
     });
 
     if (!discordResponse.ok) {
@@ -32,10 +32,14 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Webhook failed' });
     }
 
+    if (discordRequest.cleanupTargets.length > 0) {
+      await cleanupBlobTargets(discordRequest.cleanupTargets);
+    }
+
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Internal webhook error:', error);
-    return res.status(500).json({ error: 'Internal error' });
+    return res.status(500).json({ error: 'Internal error', details: error?.message || 'Unknown error' });
   }
 }
 
@@ -46,17 +50,18 @@ async function readRequestPayload(req) {
     return parseMultipartRequest(req);
   }
 
-  return {
-    ...(req.body || {}),
-    files: {},
-  };
+  if (typeof req.body === 'string') {
+    return JSON.parse(req.body || '{}');
+  }
+
+  return req.body || {};
 }
 
 async function parseMultipartRequest(req) {
   const form = formidable({
     multiples: true,
-    maxFiles: 4,
-    maxFileSize: 2 * 1024 * 1024,
+    maxFiles: 7,
+    maxFileSize: DISCORD_MAX_UPLOAD_BYTES,
     allowEmptyFiles: false,
   });
 
@@ -82,15 +87,107 @@ async function parseMultipartRequest(req) {
 
 function normalizeFiles(files) {
   const photos = asArray(files.evidencePhotos).filter(Boolean);
-  const videos = asArray(files.evidenceVideo).filter(Boolean);
+  const legacyVideo = asArray(files.evidenceVideo).filter(Boolean);
+  const videos = asArray(files.evidenceVideos).filter(Boolean).concat(legacyVideo);
 
   return {
     evidencePhotos: photos,
-    evidenceVideo: videos[0] || null,
+    evidenceVideos: videos,
   };
 }
 
-async function buildDiscordPayload({ card, action, cardIndex, files }) {
+async function buildDiscordRequest({ card, action, cardIndex, files, media }) {
+  const embed = buildDiscordEmbed({ card, action, cardIndex });
+  const cleanupTargets = collectCleanupTargets(media);
+
+  if (action === 'delete') {
+    return {
+      body: JSON.stringify({ embeds: [embed] }),
+      headers: { 'Content-Type': 'application/json' },
+      cleanupTargets: [],
+    };
+  }
+
+  const remotePhotos = normalizeRemoteUploads(media?.photos);
+  const remoteVideos = normalizeRemoteUploads(media?.videos);
+  const localPhotos = files?.evidencePhotos || [];
+  const localVideos = files?.evidenceVideos || [];
+  const hasAttachments =
+    remotePhotos.length > 0 ||
+    remoteVideos.length > 0 ||
+    localPhotos.length > 0 ||
+    localVideos.length > 0;
+
+  if (!hasAttachments) {
+    return {
+      body: JSON.stringify({ embeds: [embed] }),
+      headers: { 'Content-Type': 'application/json' },
+      cleanupTargets: [],
+    };
+  }
+
+  const formData = new FormData();
+  const attachments = [];
+  let attachmentIndex = 0;
+
+  for (const item of remotePhotos) {
+    attachmentIndex = await appendRemoteAttachment({
+      item,
+      kind: 'Foto de evidencia',
+      attachmentIndex,
+      formData,
+      attachments,
+    });
+  }
+
+  for (const item of remoteVideos) {
+    attachmentIndex = await appendRemoteAttachment({
+      item,
+      kind: 'Vídeo da evidência',
+      attachmentIndex,
+      formData,
+      attachments,
+    });
+  }
+
+  for (const photo of localPhotos) {
+    attachmentIndex = await appendLocalAttachment({
+      file: photo,
+      fallbackName: `foto-${attachmentIndex + 1}.png`,
+      description: `Foto de evidencia ${attachmentIndex + 1}`,
+      attachmentIndex,
+      formData,
+      attachments,
+    });
+  }
+
+  for (const video of localVideos) {
+    attachmentIndex = await appendLocalAttachment({
+      file: video,
+      fallbackName: `video-${attachmentIndex + 1}.mp4`,
+      description: `Vídeo da evidência ${attachmentIndex + 1}`,
+      attachmentIndex,
+      formData,
+      attachments,
+    });
+  }
+
+  formData.append(
+    'payload_json',
+    JSON.stringify({
+      embeds: [embed],
+      attachments,
+    })
+  );
+
+  return {
+    body: formData,
+    headers: undefined,
+    cleanupTargets,
+  };
+}
+
+function buildDiscordEmbed({ card, action, cardIndex }) {
   const titles = {
     create: 'Novo Card Criado! 📋',
     update: 'Card Atualizado! ✏️',
@@ -104,10 +201,10 @@ async function buildDiscordPayload({ card, action, cardIndex, files }) {
 
   const mediaSummary = [
     `${card?.evidenciasFotos?.length || 0} foto(s)`,
-    card?.evidenciaVideo ? '1 vídeo' : '0 vídeo',
+    `${card?.evidenciasVideos?.length || 0} vídeo(s)`,
   ].join(' • ');
 
-  const embed = {
+  return {
     title: titles[action] || 'Card Modificado',
     color: colors[action] || 0x37b7a5,
     fields:
@@ -149,56 +246,66 @@ async function buildDiscordPayload({ card, action, cardIndex, files }) {
         : [{ name: 'Card Removido', value: `Card ${Number(cardIndex) + 1} foi removido`, inline: false }],
     timestamp: new Date().toISOString(),
   };
+}
 
-  if (action === 'delete') {
-    return JSON.stringify({ embeds: [embed] });
+async function appendRemoteAttachment({ item, kind, attachmentIndex, formData, attachments }) {
+  if (Number(item.size || 0) > DISCORD_MAX_UPLOAD_BYTES) {
+    throw new Error(`Arquivo ${item.name || 'sem nome'} excede o limite de 10 MB do Discord.`);
   }
 
-  const hasFiles = (files.evidencePhotos || []).length > 0 || Boolean(files.evidenceVideo);
-  if (!hasFiles) {
-    return JSON.stringify({ embeds: [embed] });
+  const response = await fetch(item.url);
+  if (!response.ok) {
+    throw new Error(`Nao foi possivel ler a evidência temporária ${item.name || item.url}.`);
   }
 
-  const formData = new FormData();
-  const attachments = [];
-  let attachmentIndex = 0;
+  const buffer = Buffer.from(await response.arrayBuffer());
+  const blob = new Blob([buffer], { type: item.type || response.headers.get('content-type') || 'application/octet-stream' });
+  const fileName = safeFileName(item.name || `arquivo-${attachmentIndex + 1}`);
+  formData.append(`files[${attachmentIndex}]`, blob, fileName);
+  attachments.push({
+    id: attachmentIndex,
+    filename: fileName,
+    description: `${kind} ${attachmentIndex + 1}`,
+  });
 
-  for (const photo of files.evidencePhotos || []) {
-    const fileName = safeFileName(photo.originalFilename || `foto-${attachmentIndex + 1}.png`);
-    const buffer = await fs.readFile(photo.filepath);
-    const blob = new Blob([buffer], { type: photo.mimetype || 'image/png' });
-    formData.append(`files[${attachmentIndex}]`, blob, fileName);
-    attachments.push({
-      id: attachmentIndex,
-      filename: fileName,
-      description: `Foto de evidencia ${attachmentIndex + 1}`,
-    });
-    attachmentIndex += 1;
+  return attachmentIndex + 1;
+}
+
+async function appendLocalAttachment({ file, fallbackName, description, attachmentIndex, formData, attachments }) {
+  const buffer = await fs.readFile(file.filepath);
+  const blob = new Blob([buffer], {
+    type: file.mimetype || 'application/octet-stream',
+  });
+  const fileName = safeFileName(file.originalFilename || fallbackName);
+  formData.append(`files[${attachmentIndex}]`, blob, fileName);
+  attachments.push({
+    id: attachmentIndex,
+    filename: fileName,
+    description,
+  });
+
+  return attachmentIndex + 1;
+}
+
+function normalizeRemoteUploads(items) {
+  return Array.isArray(items) ? items.filter((item) => item?.url) : [];
+}
+
+function collectCleanupTargets(media) {
+  return []
+    .concat(normalizeRemoteUploads(media?.photos))
+    .concat(normalizeRemoteUploads(media?.videos))
+    .map((item) => item.pathname || item.url)
+    .filter(Boolean);
+}
+
+async function cleanupBlobTargets(targets) {
+  if (!targets.length) return;
+  try {
+    await del(targets);
+  } catch (error) {
+    console.error('Falha ao limpar blobs temporários:', error);
   }
-
-  if (files.evidenceVideo) {
-    const fileName = safeFileName(files.evidenceVideo.originalFilename || 'evidencia-video.mp4');
-    const buffer = await fs.readFile(files.evidenceVideo.filepath);
-    const blob = new Blob([buffer], {
-      type: files.evidenceVideo.mimetype || 'video/mp4',
-    });
-    formData.append(`files[${attachmentIndex}]`, blob, fileName);
-    attachments.push({
-      id: attachmentIndex,
-      filename: fileName,
-      description: 'Vídeo da evidência',
-    });
-  }
-
-  formData.append(
-    'payload_json',
-    JSON.stringify({
-      embeds: [embed],
-      attachments,
-    })
-  );
-
-  return formData;
 }
 
 function firstValue(value) {

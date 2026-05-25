@@ -181,7 +181,7 @@
                   <div class="evidence-card__head">
                     <div>
                       <strong>Fotos da evidência</strong>
-                      <p class="section-copy">PNG, JPG ou WEBP.</p>
+                      <p class="section-copy">PNG, JPG ou WEBP. Até 5 arquivos de 10 MB.</p>
                     </div>
                     <button id="add-photo-trigger" type="button" class="button secondary">
                       Selecionar fotos
@@ -204,7 +204,7 @@
                   <div class="evidence-card__head">
                     <div>
                       <strong>Vídeo da evidência</strong>
-                      <p class="section-copy">MP4 ou WEBM.</p>
+                      <p class="section-copy">MP4 ou WEBM. Até 2 arquivos de 10 MB.</p>
                     </div>
                     <button id="add-video-trigger" type="button" class="button secondary">
                       Selecionar vídeo
@@ -215,6 +215,7 @@
                     class="sr-only"
                     type="file"
                     accept="video/mp4,video/webm"
+                    multiple
                   />
                   <div id="video-evidence-empty" class="evidence-empty">
                     Nenhum vídeo adicionado ainda.
@@ -223,7 +224,7 @@
                 </div>
               </div>
               <p id="evidence-session-note" class="form-feedback full-span is-info">
-                As evidências ficam disponíveis nesta aba até o envio. Se a página recarregar, reanexe os arquivos.
+                As evidências ficam temporariamente no Blob até o envio ao Discord e depois são apagadas.
               </p>
             </section>
             <p id="card-feedback" class="form-feedback full-span" aria-live="polite"></p>
@@ -251,6 +252,6 @@
     </footer>
 
     <script src="../assets/js/auth.js?v=20260505a"></script>
-    <script src="../assets/js/cards.js?v=20260505a"></script>
+    <script src="../assets/js/cards.js?v=20260525b"></script>
   </body>
 </html>

@@ -1,7 +1,9 @@
 const CARD_STORAGE_KEY = 'createdCards';
-const MAX_PHOTOS = 3;
-const MAX_IMAGE_BYTES = 500 * 1024;
-const MAX_VIDEO_BYTES = Math.floor(1.5 * 1024 * 1024);
+const MAX_PHOTOS = 5;
+const MAX_VIDEOS = 2;
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 10 * 1024 * 1024;
+const MULTIPART_THRESHOLD_BYTES = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm'];
 
@@ -29,19 +31,28 @@ let editingCardId = null;
 let acceptanceCriteria = [];
 let usersDirectory = [];
 let photoEvidence = [];
-let videoEvidence = null;
-const mediaStore = new Map();
+let videoEvidence = [];
+let blobUpload;
+let uploadInFlight = 0;
 
 boot();
 
 async function boot() {
   await window.ReqAuth.requireAuth();
+  await ensureBlobUpload();
   await loadUsers();
   hydrateCards();
   wireEvents();
   renderAcceptanceCriteria();
   renderEvidence();
   renderCreatedCards();
+}
+
+async function ensureBlobUpload() {
+  if (blobUpload) return blobUpload;
+  const client = await import('https://esm.sh/@vercel/blob/client');
+  blobUpload = client.upload;
+  return blobUpload;
 }
 
 function wireEvents() {
@@ -76,40 +87,35 @@ function wireEvents() {
   });
 
   videoEvidenceInput.addEventListener('change', async (event) => {
-    await handleVideoSelection(event.target.files?.[0] || null);
+    await handleVideoSelection(event.target.files);
     videoEvidenceInput.value = '';
   });
 
-  photoEvidenceList.addEventListener('click', (event) => {
+  photoEvidenceList.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-remove-photo-index]');
     if (!button) return;
     const index = Number.parseInt(button.dataset.removePhotoIndex, 10);
     if (Number.isNaN(index)) return;
-    revokeMediaUrls([photoEvidence[index]]);
-    photoEvidence.splice(index, 1);
+    const [removed] = photoEvidence.splice(index, 1);
     renderEvidence();
+    await cleanupTempMedia([removed]);
   });
 
-  videoEvidenceList.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-remove-video]');
+  videoEvidenceList.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-remove-video-index]');
     if (!button) return;
-    revokeMediaUrls([videoEvidence]);
-    videoEvidence = null;
+    const index = Number.parseInt(button.dataset.removeVideoIndex, 10);
+    if (Number.isNaN(index)) return;
+    const [removed] = videoEvidence.splice(index, 1);
     renderEvidence();
+    await cleanupTempMedia([removed]);
   });
 
   createCardBtn.addEventListener('click', onSubmitCard);
-  clearCardFormBtn.addEventListener('click', () => clearForm());
-  createdCardsList.addEventListener('click', onCardsListClick);
-
-  window.addEventListener('beforeunload', () => {
-    revokeMediaUrls(photoEvidence);
-    revokeMediaUrls([videoEvidence]);
-    for (const media of mediaStore.values()) {
-      revokeMediaUrls(media.photos);
-      revokeMediaUrls([media.video]);
-    }
+  clearCardFormBtn.addEventListener('click', async () => {
+    await clearForm({ deleteDraftUploads: editingCardId === null });
   });
+  createdCardsList.addEventListener('click', onCardsListClick);
 }
 
 async function loadUsers() {
@@ -119,34 +125,36 @@ async function loadUsers() {
 }
 
 function hydrateCards() {
-  createdCards = createdCards.map((card) => ({
-    ...card,
-    localId: card.localId || crypto.randomUUID(),
-    evidenciasFotos: normalizeEvidenceMetadata(card.evidenciasFotos),
-    evidenciaVideo: normalizeSingleEvidenceMetadata(card.evidenciaVideo),
-  }));
+  createdCards = createdCards.map((card) => normalizeStoredCard(card));
   persistCards();
 }
 
-function normalizeEvidenceMetadata(items) {
+function normalizeStoredCard(card) {
+  const evidenciasFotos = normalizeEvidenceArray(card.evidenciasFotos);
+  const evidenciasVideos = normalizeEvidenceArray(
+    card.evidenciasVideos || (card.evidenciaVideo ? [card.evidenciaVideo] : [])
+  );
+
+  return {
+    ...card,
+    localId: card.localId || crypto.randomUUID(),
+    criteriosAceite: Array.isArray(card.criteriosAceite) ? card.criteriosAceite : [],
+    evidenciasFotos,
+    evidenciasVideos,
+  };
+}
+
+function normalizeEvidenceArray(items) {
   return Array.isArray(items)
     ? items.map((item) => ({
         id: item.id || crypto.randomUUID(),
         name: item.name || 'arquivo',
         type: item.type || '',
         size: Number(item.size || 0),
+        url: item.url || item.downloadUrl || '',
+        pathname: item.pathname || '',
       }))
     : [];
-}
-
-function normalizeSingleEvidenceMetadata(item) {
-  if (!item) return null;
-  return {
-    id: item.id || crypto.randomUUID(),
-    name: item.name || 'arquivo',
-    type: item.type || '',
-    size: Number(item.size || 0),
-  };
 }
 
 function renderResponsavelOptions(selectedId = '') {
@@ -156,56 +164,35 @@ function renderResponsavelOptions(selectedId = '') {
   responsavelTecnicoSelect.value = selectedId || '';
 }
 
-async function sendToDiscord(card, media, action = 'create', cardIndex = null) {
+async function sendToDiscord(card, action = 'create', cardIndex = null) {
   try {
-    if (action === 'delete') {
-      const response = await fetch('/api/webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ card, action, cardIndex }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      setFeedback('Card removido e webhook notificado.', 'success');
-      return true;
-    }
-
-    const formData = new FormData();
-    formData.append(
-      'payload',
-      JSON.stringify({
+    const response = await fetch('/api/webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         card,
         action,
         cardIndex,
-      })
-    );
-
-    for (const item of media.photos) {
-      formData.append('evidencePhotos', item.file, item.name);
-    }
-
-    if (media.video?.file) {
-      formData.append('evidenceVideo', media.video.file, media.video.name);
-    }
-
-    const response = await fetch('/api/webhook', {
-      method: 'POST',
-      body: formData,
+        media: collectPendingMedia(card),
+      }),
     });
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
     }
 
-    setFeedback('Card sincronizado com o webhook do Discord.', 'success');
+    if (action === 'delete') {
+      setFeedback('Card removido e webhook notificado.', 'success');
+    } else {
+      setFeedback('Card sincronizado com o webhook do Discord.', 'success');
+    }
     return true;
   } catch (error) {
     console.error('Erro ao enviar para Discord:', error);
     setFeedback(
-      'Nao foi possivel notificar o Discord. O card textual foi salvo e as evidencias permanecem nesta aba.',
+      action === 'delete'
+        ? 'Nao foi possivel notificar o Discord sobre a exclusao.'
+        : 'Nao foi possivel notificar o Discord. O card foi salvo e as evidencias temporarias permanecem disponiveis para retry.',
       'error'
     );
     return false;
@@ -228,9 +215,8 @@ function renderCreatedCards() {
   createdCards.forEach((card, index) => {
     const cardElement = document.createElement('div');
     const photoCount = card.evidenciasFotos.length;
-    const hasVideo = Boolean(card.evidenciaVideo);
-    const sessionMedia = mediaStore.get(card.localId);
-    const needsReattach = (photoCount || hasVideo) && !sessionMedia;
+    const videoCount = card.evidenciasVideos.length;
+    const needsReattach = hasAnyEvidence(card) && !hasPendingBlobMedia(card);
 
     cardElement.className = 'created-card';
     cardElement.innerHTML = `
@@ -268,14 +254,14 @@ function renderCreatedCards() {
       </div>
       <div class="card-section">
         <strong>Critérios de Aceite:</strong>
-        <ul>${card.criteriosAceite.map((criterion) => `<li>${escapeHtml(criterion)}</li>`).join('')}</ul>
+        <ul>${(card.criteriosAceite || []).map((criterion) => `<li>${escapeHtml(criterion)}</li>`).join('')}</ul>
       </div>
       <div class="card-section">
         <strong>Evidências:</strong>
         <div class="media-chip-row">
           <span class="evidence-chip">${photoCount} foto(s)</span>
-          <span class="evidence-chip">${hasVideo ? '1 vídeo' : '0 vídeo'}</span>
-          ${needsReattach ? '<span class="evidence-chip">reanexar na próxima edição</span>' : ''}
+          <span class="evidence-chip">${videoCount} vídeo(s)</span>
+          ${needsReattach ? '<span class="evidence-chip">reanexar para reenviar</span>' : ''}
         </div>
       </div>
       ${card.observacao ? `<div class="card-section"><strong>Observação:</strong> <p>${escapeHtml(card.observacao)}</p></div>` : ''}
@@ -302,17 +288,19 @@ function renderEvidence() {
   videoEvidenceList.innerHTML = '';
 
   photoEvidenceEmpty.hidden = photoEvidence.length > 0;
-  videoEvidenceEmpty.hidden = Boolean(videoEvidence);
+  videoEvidenceEmpty.hidden = videoEvidence.length > 0;
 
   addPhotoTrigger.textContent = photoEvidence.length ? 'Adicionar mais fotos' : 'Selecionar fotos';
-  addPhotoTrigger.disabled = photoEvidence.length >= MAX_PHOTOS;
-  addVideoTrigger.textContent = videoEvidence ? 'Substituir vídeo' : 'Selecionar vídeo';
+  addPhotoTrigger.disabled = photoEvidence.length >= MAX_PHOTOS || uploadInFlight > 0;
+  addVideoTrigger.textContent = videoEvidence.length ? 'Adicionar mais vídeos' : 'Selecionar vídeo';
+  addVideoTrigger.disabled = videoEvidence.length >= MAX_VIDEOS || uploadInFlight > 0;
+  createCardBtn.disabled = uploadInFlight > 0;
 
   photoEvidence.forEach((item, index) => {
     const node = document.createElement('article');
     node.className = 'evidence-item';
     node.innerHTML = `
-      <img src="${item.previewUrl}" alt="${escapeHtml(item.name)}" />
+      <img src="${item.url}" alt="${escapeHtml(item.name)}" />
       <div class="evidence-item__meta">
         <div>
           <div class="evidence-item__name">${escapeHtml(item.name)}</div>
@@ -326,43 +314,50 @@ function renderEvidence() {
     photoEvidenceList.appendChild(node);
   });
 
-  if (videoEvidence) {
+  videoEvidence.forEach((item, index) => {
     const node = document.createElement('article');
     node.className = 'video-preview-card';
     node.innerHTML = `
-      <video controls preload="metadata" src="${videoEvidence.previewUrl}"></video>
+      <video controls preload="metadata" src="${item.url}"></video>
       <div class="video-preview-card__meta">
         <div>
-          <div class="evidence-item__name">${escapeHtml(videoEvidence.name)}</div>
-          <span>${formatFileSize(videoEvidence.size)}</span>
+          <div class="evidence-item__name">${escapeHtml(item.name)}</div>
+          <span>${formatFileSize(item.size)}</span>
         </div>
-        <button class="button danger-light" type="button" data-remove-video>
+        <button class="button danger-light" type="button" data-remove-video-index="${index}">
           Remover
         </button>
       </div>
     `;
     videoEvidenceList.appendChild(node);
-  }
+  });
 
   if (evidenceSessionNote) {
-    evidenceSessionNote.textContent = editingCardId !== null && !hasCurrentSessionMedia()
-      ? 'As evidências anteriores não estão mais nesta aba. Reanexe os arquivos antes de reenviar.'
-      : 'As evidências ficam disponíveis nesta aba até o envio. Se a página recarregar, reanexe os arquivos.';
-    evidenceSessionNote.className = `form-feedback full-span ${editingCardId !== null && !hasCurrentSessionMedia() ? 'is-error' : 'is-info'}`;
+    const hasPendingMedia = photoEvidence.length > 0 || videoEvidence.length > 0;
+    if (uploadInFlight > 0) {
+      evidenceSessionNote.textContent = 'Enviando evidências temporárias para o Blob. Aguarde concluir antes de salvar o card.';
+      evidenceSessionNote.className = 'form-feedback full-span is-info';
+    } else if (editingCardId !== null && !hasPendingMedia) {
+      evidenceSessionNote.textContent = 'As evidências anteriores já foram enviadas ou removidas. Reanexe arquivos se quiser reenviar mídia ao Discord.';
+      evidenceSessionNote.className = 'form-feedback full-span is-info';
+    } else {
+      evidenceSessionNote.textContent = 'As evidências ficam temporariamente no Blob até o envio ao Discord. Depois disso, os arquivos são apagados automaticamente.';
+      evidenceSessionNote.className = 'form-feedback full-span is-info';
+    }
   }
 }
 
-function clearForm(options = {}) {
-  const { keepFeedback = false, preserveStoredMedia = false } = options;
-  if (!preserveStoredMedia) {
-    revokeMediaUrls(photoEvidence);
-    revokeMediaUrls([videoEvidence]);
+async function clearForm(options = {}) {
+  const { keepFeedback = false, deleteDraftUploads = false } = options;
+  if (deleteDraftUploads) {
+    await cleanupTempMedia(photoEvidence);
+    await cleanupTempMedia(videoEvidence);
   }
 
   cardForm.reset();
   acceptanceCriteria = [];
   photoEvidence = [];
-  videoEvidence = null;
+  videoEvidence = [];
   editingCardId = null;
   renderAcceptanceCriteria();
   renderEvidence();
@@ -376,6 +371,11 @@ function clearForm(options = {}) {
 
 async function onSubmitCard(event) {
   event.preventDefault();
+
+  if (uploadInFlight > 0) {
+    setFeedback('Aguarde terminar o upload das evidências antes de criar o card.', 'error');
+    return;
+  }
 
   const formData = new FormData(cardForm);
   const responsavelTecnicoId = String(formData.get('responsavelTecnicoId') || '');
@@ -395,8 +395,8 @@ async function onSubmitCard(event) {
     responsavelTecnico: responsavel?.name || '',
     criteriosAceite: [...acceptanceCriteria],
     observacao: String(formData.get('observacao') || '').trim(),
-    evidenciasFotos: photoEvidence.map(toEvidenceMetadata),
-    evidenciaVideo: videoEvidence ? toEvidenceMetadata(videoEvidence) : null,
+    evidenciasFotos: cloneEvidenceArray(photoEvidence),
+    evidenciasVideos: cloneEvidenceArray(videoEvidence),
   };
 
   if (
@@ -410,34 +410,34 @@ async function onSubmitCard(event) {
     return;
   }
 
-  const currentMedia = {
-    photos: cloneMediaForStore(photoEvidence),
-    video: videoEvidence ? cloneMediaForStore([videoEvidence])[0] : null,
-  };
+  let cardIndex = editingCardId;
 
   if (editingCardId !== null) {
-    replaceStoredMedia(localId, currentMedia);
     createdCards[editingCardId] = card;
-    persistCards();
-    await sendToDiscord(stripEvidencePayload(card), currentMedia, 'update', editingCardId);
   } else {
-    replaceStoredMedia(localId, currentMedia);
     createdCards.push(card);
+    cardIndex = createdCards.length - 1;
+  }
+
+  persistCards();
+  const sent = await sendToDiscord(card, editingCardId !== null ? 'update' : 'create', cardIndex);
+
+  if (sent) {
+    createdCards[cardIndex] = stripTemporaryBlobRefs(card);
     persistCards();
-    await sendToDiscord(stripEvidencePayload(card), currentMedia, 'create', createdCards.length - 1);
   }
 
   renderCreatedCards();
-  clearForm({ keepFeedback: true, preserveStoredMedia: true });
+  await clearForm({ keepFeedback: true, deleteDraftUploads: false });
 }
 
-function onCardsListClick(event) {
+async function onCardsListClick(event) {
   if (event.target.classList.contains('edit-card')) {
     const id = Number.parseInt(event.target.dataset.id, 10);
     const card = createdCards[id];
     if (!card) return;
 
-    clearForm({ preserveStoredMedia: false });
+    await clearForm({ deleteDraftUploads: editingCardId === null });
 
     editingCardId = id;
     cardForm.contexto.value = card.contexto || '';
@@ -451,19 +451,17 @@ function onCardsListClick(event) {
     renderResponsavelOptions(card.responsavelTecnicoId || '');
     cardForm.observacao.value = card.observacao || '';
     acceptanceCriteria = [...(card.criteriosAceite || [])];
-
-    const sessionMedia = mediaStore.get(card.localId);
-    photoEvidence = sessionMedia ? cloneMediaForEditing(sessionMedia.photos) : [];
-    videoEvidence = sessionMedia?.video ? cloneMediaForEditing([sessionMedia.video])[0] : null;
+    photoEvidence = cloneEvidenceArray(card.evidenciasFotos);
+    videoEvidence = cloneEvidenceArray(card.evidenciasVideos);
 
     renderAcceptanceCriteria();
     renderEvidence();
     createCardBtn.textContent = 'Salvar Edição';
     setFeedback(
-      sessionMedia
-        ? 'Card carregado para edicao.'
+      hasPendingBlobMedia(card)
+        ? 'Card carregado para edicao. As evidências temporárias ainda podem ser reenviadas.'
         : 'Card carregado. Reanexe as evidências se quiser reenviar mídia ao Discord.',
-      sessionMedia ? 'info' : 'error'
+      'info'
     );
     cardForm.scrollIntoView({ behavior: 'smooth' });
     return;
@@ -475,10 +473,13 @@ function onCardsListClick(event) {
 
     const cardToDelete = createdCards[id];
     createdCards.splice(id, 1);
-    dropStoredMedia(cardToDelete.localId);
     persistCards();
     renderCreatedCards();
-    sendToDiscord(stripEvidencePayload(cardToDelete), { photos: [], video: null }, 'delete', id);
+
+    await cleanupTempMedia(cardToDelete.evidenciasFotos);
+    await cleanupTempMedia(cardToDelete.evidenciasVideos);
+    await sendToDiscord(stripTemporaryBlobRefs(cardToDelete), 'delete', id);
+
     setFeedback('Card removido da fila local.', 'info');
   }
 }
@@ -492,45 +493,86 @@ async function handlePhotoSelection(fileList) {
     return;
   }
 
-  const nextItems = [];
   for (const file of files) {
     const validationError = validateMediaFile(file, 'photo');
     if (validationError) {
       setFeedback(validationError, 'error');
       return;
     }
-    nextItems.push(createMediaItem(file, 'photo'));
   }
 
-  photoEvidence = photoEvidence.concat(nextItems);
-  renderEvidence();
-  setFeedback('Fotos carregadas nesta aba e prontas para envio.', 'info');
+  for (const file of files) {
+    const uploaded = await uploadEvidenceFile(file, 'photo');
+    if (!uploaded) return;
+    photoEvidence.push(uploaded);
+    renderEvidence();
+  }
+
+  setFeedback('Fotos enviadas para o armazenamento temporario e prontas para o card.', 'success');
 }
 
-async function handleVideoSelection(file) {
-  if (!file) return;
-  const validationError = validateMediaFile(file, 'video');
-  if (validationError) {
-    setFeedback(validationError, 'error');
+async function handleVideoSelection(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+
+  if (videoEvidence.length + files.length > MAX_VIDEOS) {
+    setFeedback(`Voce pode anexar no maximo ${MAX_VIDEOS} vídeos por card.`, 'error');
     return;
   }
 
-  revokeMediaUrls([videoEvidence]);
-  videoEvidence = createMediaItem(file, 'video');
-  renderEvidence();
-  setFeedback('Vídeo carregado nesta aba e pronto para envio.', 'info');
+  for (const file of files) {
+    const validationError = validateMediaFile(file, 'video');
+    if (validationError) {
+      setFeedback(validationError, 'error');
+      return;
+    }
+  }
+
+  for (const file of files) {
+    const uploaded = await uploadEvidenceFile(file, 'video');
+    if (!uploaded) return;
+    videoEvidence.push(uploaded);
+    renderEvidence();
+  }
+
+  setFeedback('Vídeos enviados para o armazenamento temporario e prontos para o card.', 'success');
 }
 
-function createMediaItem(file, kind) {
-  return {
-    id: crypto.randomUUID(),
-    kind,
-    name: file.name,
-    type: file.type,
-    size: file.size,
-    file,
-    previewUrl: URL.createObjectURL(file),
-  };
+async function uploadEvidenceFile(file, kind) {
+  uploadInFlight += 1;
+  renderEvidence();
+  setFeedback(`Enviando ${kind === 'photo' ? 'foto' : 'vídeo'} temporariamente para o Blob...`, 'info');
+
+  try {
+    const uploadClient = await ensureBlobUpload();
+    const pathname = `cards-temp/${kind}/${Date.now()}-${safeFileName(file.name)}`;
+    const blob = await uploadClient(pathname, file, {
+      access: 'public',
+      handleUploadUrl: '/api/blob/upload',
+      multipart: file.size > MULTIPART_THRESHOLD_BYTES,
+      clientPayload: JSON.stringify({
+        kind,
+        contentType: file.type,
+      }),
+    });
+
+    return {
+      id: crypto.randomUUID(),
+      kind,
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      url: blob.url,
+      pathname: blob.pathname,
+    };
+  } catch (error) {
+    console.error('Falha no upload temporario:', error);
+    setFeedback('Nao foi possivel enviar a evidência para o armazenamento temporario.', 'error');
+    return null;
+  } finally {
+    uploadInFlight = Math.max(0, uploadInFlight - 1);
+    renderEvidence();
+  }
 }
 
 function validateMediaFile(file, kind) {
@@ -548,7 +590,7 @@ function validateMediaFile(file, kind) {
     return 'Formato de vídeo nao suportado. Envie MP4 ou WEBM.';
   }
   if (file.size > MAX_VIDEO_BYTES) {
-    return `O vídeo deve ter no maximo ${formatFileSize(MAX_VIDEO_BYTES)}.`;
+    return `Cada vídeo deve ter no maximo ${formatFileSize(MAX_VIDEO_BYTES)}.`;
   }
   return '';
 }
@@ -576,15 +618,15 @@ function persistCards() {
   }
 }
 
-function stripEvidencePayload(card) {
+function stripTemporaryBlobRefs(card) {
   return {
     ...card,
-    evidenciasFotos: normalizeEvidenceMetadata(card.evidenciasFotos),
-    evidenciaVideo: normalizeSingleEvidenceMetadata(card.evidenciaVideo),
+    evidenciasFotos: card.evidenciasFotos.map(toPersistedEvidenceMetadata),
+    evidenciasVideos: card.evidenciasVideos.map(toPersistedEvidenceMetadata),
   };
 }
 
-function toEvidenceMetadata(item) {
+function toPersistedEvidenceMetadata(item) {
   return {
     id: item.id,
     name: item.name,
@@ -593,42 +635,53 @@ function toEvidenceMetadata(item) {
   };
 }
 
-function cloneMediaForStore(items) {
-  return items.filter(Boolean).map((item) => ({
-    ...item,
-  }));
+function cloneEvidenceArray(items) {
+  return items.filter(Boolean).map((item) => ({ ...item }));
 }
 
-function cloneMediaForEditing(items) {
-  return items.filter(Boolean).map((item) => ({
-    ...item,
-    previewUrl: item.file ? URL.createObjectURL(item.file) : item.previewUrl,
-  }));
+function collectPendingMedia(card) {
+  return {
+    photos: card.evidenciasFotos.filter(hasBlobTarget).map(toRemoteUploadDescriptor),
+    videos: card.evidenciasVideos.filter(hasBlobTarget).map(toRemoteUploadDescriptor),
+  };
 }
 
-function replaceStoredMedia(localId, media) {
-  dropStoredMedia(localId);
-  mediaStore.set(localId, media);
+function toRemoteUploadDescriptor(item) {
+  return {
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    size: item.size,
+    url: item.url,
+    pathname: item.pathname,
+  };
 }
 
-function dropStoredMedia(localId) {
-  const existing = mediaStore.get(localId);
-  if (!existing) return;
-  revokeMediaUrls(existing.photos);
-  revokeMediaUrls([existing.video]);
-  mediaStore.delete(localId);
+function hasBlobTarget(item) {
+  return Boolean(item?.url || item?.pathname);
 }
 
-function revokeMediaUrls(items) {
-  items.filter(Boolean).forEach((item) => {
-    if (item?.previewUrl) {
-      URL.revokeObjectURL(item.previewUrl);
-    }
-  });
+function hasPendingBlobMedia(card) {
+  return card.evidenciasFotos.some(hasBlobTarget) || card.evidenciasVideos.some(hasBlobTarget);
 }
 
-function hasCurrentSessionMedia() {
-  return photoEvidence.length > 0 || Boolean(videoEvidence);
+function hasAnyEvidence(card) {
+  return card.evidenciasFotos.length > 0 || card.evidenciasVideos.length > 0;
+}
+
+async function cleanupTempMedia(items) {
+  const targets = items.filter(hasBlobTarget).map((item) => item.pathname || item.url);
+  if (!targets.length) return;
+
+  try {
+    await fetch('/api/blob/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targets }),
+    });
+  } catch (error) {
+    console.error('Falha ao limpar mídia temporária:', error);
+  }
 }
 
 function setFeedback(message, kind = 'info') {
@@ -650,4 +703,13 @@ function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function safeFileName(value) {
+  return String(value || 'arquivo')
+    .normalize('NFKD')
+    .replace(/[^\w.\-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase();
 }
