@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     const jsonResponse = await handleUpload({
       body,
       request: req,
+      token: process.env.BLOB_READ_WRITE_TOKEN,
       onBeforeGenerateToken: async (_pathname, clientPayload) => {
         const auth = await getSessionFromRequest(req);
         if (!auth?.session) {

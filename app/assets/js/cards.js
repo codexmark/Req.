@@ -50,7 +50,7 @@ async function boot() {
 
 async function ensureBlobUpload() {
   if (blobUpload) return blobUpload;
-  const client = await import('https://esm.sh/@vercel/blob/client');
+  const client = await import('https://esm.sh/@vercel/blob@2.4.0/client');
   blobUpload = client.upload;
   return blobUpload;
 }
