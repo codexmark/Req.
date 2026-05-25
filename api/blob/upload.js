@@ -1,4 +1,3 @@
-import { generateClientTokenFromReadWriteToken } from '@vercel/blob/dist/client.js';
 import { getSessionFromRequest } from '../_lib/store.js';
 
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
@@ -34,6 +33,7 @@ export default async function handler(req, res) {
 
     const payload = parseClientPayload(body?.payload?.clientPayload);
     const allowedContentTypes = payload.kind === 'video' ? VIDEO_TYPES : IMAGE_TYPES;
+    const { generateClientTokenFromReadWriteToken } = await import('@vercel/blob/client');
 
     const clientToken = await generateClientTokenFromReadWriteToken({
       token: process.env.BLOB_READ_WRITE_TOKEN,
