@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../assets/css/app.css?v=20260829" />
-    <link rel="stylesheet" href="../assets/css/elicitation.css?v=20260829b" />
+    <link rel="stylesheet" href="../assets/css/elicitation.css?v=20260829c" />
   </head>
   <body>
     <header class="global-nav">
@@ -70,6 +70,24 @@
               <li><span>04</span><div><strong>Entregue</strong><p>Aprove e envie para Cards.</p></div></li>
             </ol>
           </article>
+
+          <section class="intelligence-overview" aria-labelledby="intelligence-title">
+            <div class="intelligence-overview__heading">
+              <div><p class="eyebrow">Requirement intelligence</p><h2 id="intelligence-title">O que precisa da sua atenção</h2></div>
+              <span id="workspace-sync-label" class="workspace-sync-label">Neste dispositivo</span>
+            </div>
+            <div class="intelligence-overview__body">
+              <div class="intelligence-metrics">
+                <article><span class="metric-icon">↗</span><strong id="metric-traced">0</strong><p>requisitos com origem rastreada</p></article>
+                <article><span class="metric-icon">✓</span><strong id="metric-review">0</strong><p>requisitos aguardando revisão</p></article>
+                <article><span class="metric-icon">!</span><strong id="metric-impact">0</strong><p>mudanças com impacto pendente</p></article>
+              </div>
+              <aside class="activity-feed" aria-label="Atividade recente">
+                <div class="activity-feed__head"><strong>Atividade recente</strong><span>Histórico do workspace</span></div>
+                <div id="workspace-activity" class="activity-list"></div>
+              </aside>
+            </div>
+          </section>
 
           <div class="recent-heading">
             <div><p class="eyebrow">Seu trabalho</p><h2>Levantamentos recentes</h2></div>
@@ -183,7 +201,25 @@
                   <label>Observações<textarea name="notes" rows="3" placeholder="Dependências, decisões ou restrições"></textarea></label>
 
                   <article class="source-card"><div><span class="eyebrow">Evidência de origem</span><p id="requirement-source"></p></div><button id="return-to-source" class="text-action" type="button">Ver resposta</button></article>
+                  <article id="change-impact" class="change-impact" hidden><span class="change-impact__icon">!</span><div><strong>Esta alteração precisa ser revisada</strong><p id="change-impact-copy">O requisito já estava aprovado. Salvar uma mudança criará uma nova versão e reabrirá a aprovação.</p></div></article>
                   <article class="quality-card"><div class="quality-card__head"><div><span class="eyebrow">Revisão de qualidade</span><h3 id="quality-title">Verifique antes de aprovar</h3></div><span id="quality-score">0/5</span></div><ul id="quality-list"></ul></article>
+
+                  <article class="traceability-card">
+                    <div class="traceability-card__head"><div><span class="eyebrow">Rastreabilidade</span><h3>Da evidência até a execução</h3></div><span id="trace-coverage" class="trace-coverage">0/3 conexões</span></div>
+                    <div class="trace-flow" aria-label="Fluxo de rastreabilidade">
+                      <div class="trace-node"><span>01</span><div><strong>Fonte</strong><p id="trace-source">Não vinculada</p></div></div>
+                      <span class="trace-arrow" aria-hidden="true">→</span>
+                      <div class="trace-node"><span>02</span><div><strong>Requisito</strong><p id="trace-requirement">REQ-001</p></div></div>
+                      <span class="trace-arrow" aria-hidden="true">→</span>
+                      <div class="trace-node"><span>03</span><div><strong>Card</strong><p id="trace-card">Ainda não criado</p></div></div>
+                    </div>
+                    <div class="dependency-editor"><label for="dependency-select">Dependências deste requisito</label><div><select id="dependency-select"><option value="">Selecionar requisito...</option></select><button id="add-dependency" class="button button--ghost" type="button">Vincular</button></div><div id="dependency-list" class="dependency-list"></div></div>
+                  </article>
+
+                  <div class="requirement-intelligence-grid">
+                    <article class="history-card"><div class="panel-heading"><div><span class="eyebrow">Histórico</span><h3>Versões e decisões</h3></div><span id="requirement-version" class="version-badge">v1</span></div><div id="requirement-history" class="history-list"></div></article>
+                    <article class="review-card"><div class="panel-heading"><div><span class="eyebrow">Revisão colaborativa</span><h3>Converse no contexto</h3></div><span id="comment-count" class="muted-count">0</span></div><div id="requirement-comments" class="comment-list"></div><div class="comment-composer"><label class="sr-only" for="comment-input">Adicionar comentário</label><textarea id="comment-input" rows="2" placeholder="Registre uma dúvida, decisão ou pedido de ajuste..."></textarea><button id="add-comment" class="button button--secondary" type="button">Comentar</button></div></article>
+                  </div>
                   <div class="requirement-actions"><button id="save-requirement" class="button button--secondary" type="submit">Salvar alterações</button><button id="reject-requirement" class="button button--ghost" type="button">Rejeitar</button><button id="approve-requirement" class="button button--primary" type="button">Aprovar requisito ✓</button></div>
                 </div>
               </form>
@@ -212,6 +248,6 @@
     <footer class="global-footer"><div class="global-footer__content"><span class="global-footer__brand">REQ.</span><span class="global-footer__separator">•</span><span class="global-footer__credit">Requirement intelligence workspace</span><span class="global-footer__separator">•</span><span class="global-footer__handle">codexmark — 2026</span></div></footer>
 
     <script src="../assets/js/auth.js?v=20260829"></script>
-    <script src="../assets/js/elicitation.js?v=20260829b"></script>
+    <script src="../assets/js/elicitation.js?v=20260829c"></script>
   </body>
 </html>
