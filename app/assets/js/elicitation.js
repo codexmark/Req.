@@ -85,7 +85,7 @@ async function loadUsers() {
 function renderResponsavelOptions(selectedId = '') {
   const select = els.requirementForm.elements.responsavelTecnicoId;
   if (!select) return;
-  select.innerHTML = ['<option value="">Selecione um usuario</option>']
+  select.innerHTML = ['<option value="">Selecione um usuário</option>']
     .concat(usersDirectory.map((user) => `<option value="${user.id}">${escapeHtml(user.name)}</option>`))
     .join('');
   select.value = selectedId || '';
@@ -211,7 +211,7 @@ function wireEvents() {
 
 function render() {
   document.body.classList.toggle("focus-mode", state.focusMode);
-  els.focusToggle.textContent = state.focusMode ? "Modo padrao" : "Modo foco";
+  els.focusToggle.textContent = state.focusMode ? "Modo padrão" : "Modo foco";
   els.rawNotes.value = state.rawNotes;
 
   renderMetrics();
@@ -222,12 +222,12 @@ function render() {
 
 function renderMetrics() {
   const gaps = computeGaps();
-  els.captureMetric.textContent = `${state.rawNotes.trim().length} chars`;
+  els.captureMetric.textContent = `${state.rawNotes.trim().length} caracteres`;
   els.gapMetric.textContent = String(gaps.length);
   els.draftMetric.textContent = String(state.requirements.length);
   els.requirementCount.textContent = `${state.requirements.length} itens`;
   els.sessionHealth.textContent = `${state.requirements.length} requisitos gerados`;
-  els.autosaveIndicator.textContent = "Auto-save ativo";
+  if (els.autosaveIndicator) els.autosaveIndicator.textContent = "Salvo automaticamente";
 }
 
 function renderGaps() {
@@ -254,7 +254,7 @@ function renderRequirements() {
   if (!state.requirements.length) {
     const li = document.createElement("li");
     li.className = "requirements-list__empty";
-    li.textContent = "Nenhum requisito ainda. Organize o entendimento e gere os rascunhos.";
+    li.textContent = "Nenhum requisito por enquanto. Consolide o entendimento para gerar os primeiros rascunhos.";
     els.requirementsList.appendChild(li);
     return;
   }
@@ -418,7 +418,7 @@ function buildRequirementFromLine(line, type) {
 }
 
 function buildFallbackRequirement() {
-  const objective = state.summaries.objective || state.session.primaryGoal || "atender o objetivo da sessao";
+  const objective = state.summaries.objective || state.session.primaryGoal || "atender o objetivo da sessão";
   const problem = state.summaries.problem || "resolver o problema relatado";
 
   return {
@@ -553,14 +553,14 @@ function computeGaps() {
   if (!state.rawNotes.trim()) {
     gaps.push({
       title: "Falta captura de conversa",
-      detail: "Sem registro bruto, a geracao de requisitos fica pobre e tendenciosa.",
+      detail: "Sem registro bruto, a geração de requisitos fica pobre e tendenciosa.",
     });
   }
 
   if (!state.session.primaryGoal.trim()) {
     gaps.push({
-      title: "Objetivo da sessao nao informado",
-      detail: "Defina o resultado que precisa sair da reuniao para orientar o corte dos requisitos.",
+      title: "Objetivo da sessão não informado",
+      detail: "Defina o resultado que precisa sair da reunião para orientar o recorte dos requisitos.",
     });
   }
 
@@ -593,7 +593,7 @@ function buildMarkdownExport() {
   const lines = [
     `# ${project}`,
     "",
-    "## Contexto da sessao",
+    "## Contexto da sessão",
     "",
     `- Area / cliente: ${state.session.client || "Nao informado"}`,
     `- Facilitador: ${state.session.facilitator || "Nao informado"}`,
@@ -630,7 +630,7 @@ function buildMarkdownExport() {
      lines.push(requirement.description || "Sem descricao");
      lines.push("");
      lines.push("#### Criterios de aceite");
-     lines.push(requirement.acceptanceCriteria || "Sem criterios");
+     lines.push(requirement.acceptanceCriteria || "Sem critérios");
      lines.push("");
      lines.push("#### Observacoes");
      lines.push(requirement.notes || "Sem observacoes");

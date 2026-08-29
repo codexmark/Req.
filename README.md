@@ -1,59 +1,91 @@
-# Req. Codex
+# REQ.
 
-Req. Codex e uma aplicacao Vercel-first com autenticacao propria, CRUD basico de usuarios e dois modulos estaticos protegidos:
+> Da conversa ao requisito, com clareza e rastreabilidade.
 
-- `Login`: autentica sessao e faz bootstrap do primeiro admin
-- `Elicitacao`: captura entendimentos, organiza contexto e gera requisitos
-- `Cards`: cria cards estruturados e envia atualizacoes para um webhook do Discord
+O **REQ.** é um workspace para times de produto transformarem descoberta em execução. A plataforma reúne captura de contexto, consolidação de entendimento, geração de requisitos, criação de cards e gestão de responsáveis em um único fluxo.
 
-## Deploy
+## O produto
 
-O projeto foi organizado para funcionar a partir de duas raizes:
+- **Elicitação** — conduza sessões, registre o contexto e identifique lacunas antes que elas virem retrabalho.
+- **Requisitos** — gere rascunhos estruturados, refine critérios de aceite e exporte em Markdown ou JSON.
+- **Cards** — organize impacto, comportamento, regras, evidências e ownership em uma demanda pronta para execução.
+- **Usuários** — gerencie administradores e editores em uma base centralizada.
+- **Integrações** — sincronize cards com Discord e armazene evidências temporárias no Vercel Blob.
 
-- `app/`: frontend estatico publicado em `public/`
-- `api/`: funcoes serverless da Vercel
+## Experiência
 
-O `vercel.json` aponta para `public` como diretório final de saida.
+A interface foi desenhada como um produto SaaS responsivo e acessível:
 
-## Estrutura
+- navegação lateral no desktop e menu compacto no mobile;
+- hierarquia visual orientada pelas etapas do trabalho;
+- estados de foco, feedback e autosave visíveis;
+- formulários com leitura confortável e alvos de toque adequados;
+- identidade visual própria em verde floresta e lima;
+- layout testado em desktop e em viewport mobile de 390 px.
 
-- `app/index.html`: tela de login
-- `app/elicitation/index.html`: entrada do modulo de elicitacao
-- `app/cards/index.html`: entrada do modulo de cards
-- `app/users/index.html`: CRUD basico de usuarios (admin)
-- `app/assets/css/auth.css`: UI da autenticacao
-- `app/assets/css/elicitation.css`: UI do modulo de elicitacao
-- `app/assets/css/cards.css`: UI do modulo de cards
-- `app/assets/js/auth.js`: guardas de sessao e logout
-- `app/assets/js/login.js`: login e bootstrap do admin inicial
-- `app/assets/js/users.js`: CRUD de usuarios
-- `app/assets/js/elicitation.js`: logica do modulo de elicitacao
-- `app/assets/js/cards.js`: logica do modulo de cards
-- `api/auth/*`: login, logout, sessao e bootstrap
-- `api/users/*`: CRUD de usuarios
-- `api/webhook.js`: integracao serverless com Discord
+## Stack
 
-## Build
+- Frontend estático em HTML, CSS e JavaScript
+- Funções serverless na Vercel
+- Vercel KV / Upstash Redis para autenticação e usuários
+- Vercel Blob para evidências temporárias
+- Webhook do Discord para distribuição dos cards
 
-Build estatico para Vercel:
+## Executar o projeto
+
+Instale as dependências e gere o frontend publicado:
 
 ```bash
+npm install
 npm run build
 ```
 
-Isso copia `app/` integralmente para `public/`.
+O build é multiplataforma e copia `app/` para `public/` usando Node.js.
 
-## Variaveis de ambiente
+## Estrutura
 
-Defina no painel da Vercel:
+```text
+app/
+├── assets/
+│   ├── css/        # design system e estilos das telas
+│   ├── js/         # autenticação e módulos do produto
+│   └── favicon.svg # identidade do produto
+├── cards/          # criação e sincronização de cards
+├── elicitation/    # descoberta e requisitos
+├── users/          # administração de usuários
+└── index.html      # acesso ao workspace
 
-- `DISCORD_WEBHOOK_URL`
+api/
+├── auth/           # sessão, login, logout e bootstrap
+├── blob/           # upload e limpeza de evidências
+├── users/          # CRUD de usuários
+└── webhook.js      # integração com Discord
+```
 
-Para autenticacao e usuarios, a aplicacao aceita dois cenarios:
+## Variáveis de ambiente
 
-- `REDIS_URL` para conexao TCP/classica
-- envs REST da Vercel KV / Upstash (`KV_REST_API_URL` + `KV_REST_API_TOKEN` ou equivalentes `UPSTASH_*`)
+Configure no ambiente da Vercel:
 
-Mantenha no repositório apenas o arquivo de exemplo:
+```env
+DISCORD_WEBHOOK_URL=
 
-- `.env.example`
+# Redis TCP, ou as variáveis REST do Vercel KV / Upstash
+REDIS_URL=
+KV_REST_API_URL=
+KV_REST_API_TOKEN=
+```
+
+Use `.env.example` como referência e nunca versione credenciais reais.
+
+## Deploy
+
+O projeto é Vercel-first. O `vercel.json` publica o diretório `public/` e mantém as funções serverless em `api/`.
+
+```bash
+npm run build
+vercel --prod
+```
+
+---
+
+Criado por [codexmark](https://github.com/codexmark) · GPL-3.0

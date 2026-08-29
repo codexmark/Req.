@@ -3,14 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Req. Codex | Usuarios</title>
+    <meta name="theme-color" content="#173f32" />
+    <meta name="description" content="Gerencie membros, papéis e acesso ao workspace Req." />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <title>Req. | Usuários</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../assets/css/cards.css" />
+    <link rel="stylesheet" href="../assets/css/app.css?v=20260829" />
+    <link rel="stylesheet" href="../assets/css/cards.css?v=20260829" />
   </head>
   <body>
     <header class="global-nav">
@@ -29,10 +33,10 @@
             <span></span>
           </button>
           <div class="global-nav__brand">
-            <span class="brand-mark small">U</span>
+            <span class="brand-mark small">R.</span>
             <div>
-              <span class="global-nav__title">Req. Codex</span>
-              <span class="global-nav__subtitle">Area administrativa para gestao de usuarios e ownership.</span>
+              <span class="global-nav__title">REQ.</span>
+              <span class="global-nav__subtitle">Requirement workspace</span>
             </div>
           </div>
         </div>
@@ -42,12 +46,12 @@
       </div>
       <div id="global-nav-drawer" class="global-nav__drawer" data-nav-drawer hidden>
         <nav class="global-nav__links" aria-label="Navegacao principal">
-          <a href="../elicitation">Elicitacao</a>
+          <a href="../elicitation">Elicitação</a>
           <a href="../cards">Cards</a>
-          <a class="is-active" href="../users" aria-current="page">Usuarios</a>
+          <a class="is-active" href="../users" aria-current="page">Usuários</a>
         </nav>
         <div class="global-nav__local">
-          <span class="global-nav__local-title">Nesta pagina</span>
+          <span class="global-nav__local-title">Nesta página</span>
           <a href="#user-form">Cadastro</a>
           <a href="#users-list">Base</a>
         </div>
@@ -58,16 +62,18 @@
       <main class="main-content">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Usuarios</p>
-            <h2>Gerenciar usuarios</h2>
+            <p class="eyebrow">Administração</p>
+            <h1>Pessoas e permissões.</h1>
+            <p>Gerencie quem participa do workspace e defina o nível de acesso de cada pessoa.</p>
           </div>
         </header>
 
         <section class="surface-card">
           <div class="section-title-row">
             <div>
-              <p class="eyebrow">Cadastro</p>
-              <h2 id="user-form-title">Novo usuario</h2>
+              <p class="eyebrow">Novo membro</p>
+              <h2 id="user-form-title">Adicionar usuário</h2>
+              <p class="section-copy">Convide alguém para colaborar ou administrar o workspace.</p>
             </div>
           </div>
 
@@ -78,7 +84,7 @@
               <input name="name" required />
             </label>
             <label>
-              Email
+              E-mail
               <input name="email" type="email" required />
             </label>
             <label>
@@ -101,7 +107,7 @@
             </label>
             <p id="user-feedback" class="form-feedback full-span" aria-live="polite"></p>
             <div class="action-row full-span">
-              <button class="button primary" type="submit">Salvar usuario</button>
+              <button class="button primary" type="submit">Salvar usuário</button>
               <button id="user-form-reset" class="button secondary" type="button">Limpar</button>
             </div>
           </form>
@@ -110,8 +116,9 @@
         <section class="surface-card">
           <div class="section-title-row">
             <div>
-              <p class="eyebrow">Base</p>
-              <h2>Usuarios cadastrados</h2>
+              <p class="eyebrow">Diretório</p>
+              <h2>Usuários cadastrados</h2>
+              <p class="section-copy">Pessoas que podem receber ownership e acessar a plataforma.</p>
             </div>
           </div>
           <div id="users-list" class="created-cards-list"></div>
@@ -121,15 +128,15 @@
 
     <footer class="global-footer">
       <div class="global-footer__content">
-        <span class="global-footer__brand">Req. Codex</span>
+        <span class="global-footer__brand">REQ.</span>
         <span class="global-footer__separator">•</span>
-        <span class="global-footer__credit">Todos os direitos reservados</span>
+        <span class="global-footer__credit">Requirement intelligence workspace</span>
         <span class="global-footer__separator">•</span>
         <span class="global-footer__handle">codexmark - Mark R. Mesquita - 2026</span>
       </div>
     </footer>
 
-    <script src="../assets/js/auth.js"></script>
-    <script src="../assets/js/users.js"></script>
+    <script src="../assets/js/auth.js?v=20260829"></script>
+    <script src="../assets/js/users.js?v=20260829"></script>
   </body>
   </html>

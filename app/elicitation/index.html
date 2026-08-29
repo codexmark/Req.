@@ -3,14 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Req. Codex | Modulo Elicitacao</title>
+    <meta name="theme-color" content="#173f32" />
+    <meta name="description" content="Conduza sessões de descoberta e transforme contexto em requisitos rastreáveis." />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <title>Req. | Elicitação</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../assets/css/elicitation.css?v=20260505a" />
+    <link rel="stylesheet" href="../assets/css/app.css?v=20260829" />
+    <link rel="stylesheet" href="../assets/css/elicitation.css?v=20260829" />
   </head>
   <body>
     <header class="global-nav">
@@ -29,10 +33,10 @@
             <span></span>
           </button>
           <div class="global-nav__brand">
-            <span class="brand-mark small">R</span>
+            <span class="brand-mark small">R.</span>
             <div>
-              <span class="global-nav__title">Req. Codex</span>
-              <span class="global-nav__subtitle">Elicitacao para entendimento, consolidacao e requisitos.</span>
+              <span class="global-nav__title">REQ.</span>
+              <span class="global-nav__subtitle">Requirement workspace</span>
             </div>
           </div>
         </div>
@@ -42,12 +46,12 @@
       </div>
       <div id="global-nav-drawer" class="global-nav__drawer" data-nav-drawer hidden>
         <nav class="global-nav__links" aria-label="Navegacao principal">
-          <a class="is-active" href="../elicitation" aria-current="page">Elicitacao</a>
+          <a class="is-active" href="../elicitation" aria-current="page">Elicitação</a>
           <a href="../cards">Cards</a>
-          <a data-admin-only href="../users">Usuarios</a>
+          <a data-admin-only href="../users">Usuários</a>
         </nav>
         <div class="global-nav__local">
-          <span class="global-nav__local-title">Nesta pagina</span>
+          <span class="global-nav__local-title">Nesta página</span>
           <a href="#understanding">Entendimento</a>
           <a href="#requirements">Requisitos</a>
         </div>
@@ -59,28 +63,29 @@
         <header class="hero surface-card">
           <div class="hero__content">
             <div class="hero__brand">
-              <span class="brand-mark">R</span>
+              <span class="brand-mark">R.</span>
               <div class="hero__copyblock">
-                <p class="eyebrow">Elicitacao</p>
-                <h1>Entender, organizar e gerar requisitos</h1>
+                <p class="eyebrow">Discovery workspace</p>
+                <h1>Da conversa ao requisito.</h1>
                 <p class="hero__copy">
-                  Registre a conversa, consolide o entendimento e gere requisitos revisaveis.
+                  Capture contexto, identifique lacunas e consolide decisões em requisitos prontos para o time.
                 </p>
               </div>
             </div>
           </div>
           <div class="hero__actions">
-            <a class="button button--ghost" href="../cards">Abrir modulo cards</a>
+            <span id="autosave-indicator" class="badge badge--live">Salvando sessão</span>
+            <a class="button button--ghost" href="../cards">Abrir cards</a>
             <button id="focus-toggle" class="button button--ghost" type="button">Modo foco</button>
-            <button id="reset-session" class="button button--danger" type="button">Limpar sessao</button>
+            <button id="reset-session" class="button button--danger" type="button">Limpar sessão</button>
           </div>
         </header>
 
         <section class="panel panel--intro">
           <div class="panel__heading">
             <div>
-              <p class="eyebrow">Fluxo</p>
-              <h2>Menos ritual, mais throughput</h2>
+              <p class="eyebrow">Visão geral</p>
+              <h2>Progresso da sessão</h2>
             </div>
             <span class="badge" id="session-health">0 requisitos gerados</span>
           </div>
@@ -89,17 +94,17 @@
             <article class="metric-card">
               <span class="metric-card__label">Captura</span>
               <strong id="capture-metric">0 chars</strong>
-              <p>Quanto ja foi extraido da conversa bruta.</p>
+              <p>Volume de contexto registrado nesta sessão.</p>
             </article>
             <article class="metric-card">
               <span class="metric-card__label">Lacunas</span>
               <strong id="gap-metric">0</strong>
-              <p>Pontos que ainda merecem pergunta complementar.</p>
+              <p>Pontos que ainda pedem uma pergunta complementar.</p>
             </article>
             <article class="metric-card">
               <span class="metric-card__label">Prontos para revisar</span>
               <strong id="draft-metric">0</strong>
-              <p>Rascunhos de requisito montados a partir do contexto.</p>
+              <p>Rascunhos gerados e prontos para refinamento.</p>
             </article>
           </div>
         </section>
@@ -107,8 +112,8 @@
         <section class="panel" id="understanding">
           <div class="panel__heading">
             <div>
-              <p class="eyebrow">Sessao</p>
-              <h2>Contexto minimo</h2>
+              <p class="eyebrow">Contexto</p>
+              <h2>Informações da sessão</h2>
             </div>
           </div>
 
@@ -118,7 +123,7 @@
               <input name="projectName" placeholder="Ex.: Ferias, CRM, Fiscal" />
             </label>
             <label>
-              Area / cliente
+              Área ou cliente
               <input name="client" placeholder="Ex.: RH corporativo" />
             </label>
             <label>
@@ -133,7 +138,7 @@
               Objetivo da conversa
               <input
                 name="primaryGoal"
-                placeholder="Qual decisao ou entendimento precisamos sair daqui?"
+                placeholder="Qual decisão ou entendimento precisamos obter nesta conversa?"
               />
             </label>
           </form>
@@ -142,8 +147,8 @@
         <section class="panel panel--capture">
           <div class="panel__heading">
             <div>
-              <p class="eyebrow">1. Conversar</p>
-              <h2>Captura livre da reuniao</h2>
+              <p class="eyebrow">Etapa 01</p>
+              <h2>Capture a conversa</h2>
             </div>
             <button id="organize-button" class="button button--primary" type="button">
               Organizar entendimento
@@ -153,11 +158,11 @@
           <div class="capture-layout">
             <div class="capture-area">
               <label class="stacked-label" for="raw-notes">
-                Registro bruto
+                Notas da sessão
                 <textarea
                   id="raw-notes"
                   rows="12"
-                  placeholder="Anote a fala como ela veio: dores, exemplos, excecoes, pedidos, medo operacional, metas, retrabalho..."
+                  placeholder="Registre a conversa como ela aconteceu: dores, exemplos, exceções, pedidos, riscos, metas e retrabalho..."
                 ></textarea>
               </label>
               <div class="quick-prompts">
@@ -169,13 +174,13 @@
                   Atores
                 </button>
                 <button class="prompt-chip" type="button" data-prompt="Qual regra nunca pode ser quebrada?">
-                  Regra critica
+                  Regra crítica
                 </button>
                 <button class="prompt-chip" type="button" data-prompt="O que seria sucesso visivel para essa entrega?">
-                  Criterio de sucesso
+                  Critério de sucesso
                 </button>
                 <button class="prompt-chip" type="button" data-prompt="Qual excecao costuma gerar retrabalho ou duvida?">
-                  Excecoes
+                  Exceções
                 </button>
               </div>
             </div>
@@ -190,7 +195,7 @@
                 </ol>
               </div>
               <div class="note-card">
-                <h3>Lacunas detectadas</h3>
+                <h3>Lacunas identificadas</h3>
                 <ul id="gap-list" class="bullet-list"></ul>
               </div>
             </aside>
@@ -200,8 +205,8 @@
         <section class="panel">
           <div class="panel__heading">
             <div>
-              <p class="eyebrow">2. Entendimento</p>
-              <h2>Blocos editaveis que concentram a conversa</h2>
+              <p class="eyebrow">Etapa 02</p>
+              <h2>Consolide o entendimento</h2>
             </div>
             <button id="generate-requirements" class="button button--secondary" type="button">
               Gerar requisitos
@@ -210,7 +215,7 @@
 
           <div class="understanding-grid">
             <label class="stacked-label">
-              Objetivo de negocio
+              Objetivo de negócio
               <textarea id="summary-objective" rows="4"></textarea>
             </label>
             <label class="stacked-label">
@@ -218,11 +223,11 @@
               <textarea id="summary-problem" rows="4"></textarea>
             </label>
             <label class="stacked-label">
-              Atores e areas
+              Atores e áreas
               <textarea id="summary-actors" rows="4"></textarea>
             </label>
             <label class="stacked-label">
-              Regras e restricoes
+              Regras e restrições
               <textarea id="summary-rules" rows="4"></textarea>
             </label>
             <label class="stacked-label">
@@ -230,7 +235,7 @@
               <textarea id="summary-behaviors" rows="5"></textarea>
             </label>
             <label class="stacked-label">
-              Excecoes e riscos
+              Exceções e riscos
               <textarea id="summary-exceptions" rows="5"></textarea>
             </label>
             <label class="stacked-label understanding-grid__full">
@@ -243,12 +248,12 @@
         <section class="panel panel--requirements" id="requirements">
           <div class="panel__heading">
             <div>
-              <p class="eyebrow">3. Gerar requisitos</p>
-              <h2>Rascunhos editaveis e exportacao rapida</h2>
+              <p class="eyebrow">Etapa 03</p>
+              <h2>Refine e exporte requisitos</h2>
             </div>
             <div class="panel__actions">
               <button id="add-requirement" class="button button--ghost" type="button">Novo requisito</button>
-              <button id="export-markdown" class="button button--secondary" type="button">Exportar markdown</button>
+              <button id="export-markdown" class="button button--secondary" type="button">Exportar Markdown</button>
               <button id="export-json" class="button button--ghost" type="button">Exportar JSON</button>
             </div>
           </div>
@@ -256,7 +261,7 @@
           <div class="requirements-layout">
             <div class="requirements-list-card">
               <div class="requirements-list-card__header">
-                <h3>Fila de revisao</h3>
+                <h3>Fila de revisão</h3>
                 <span class="badge" id="requirement-count">0 itens</span>
               </div>
               <ul id="requirements-list" class="requirements-list"></ul>
@@ -265,7 +270,7 @@
             <form id="requirement-form" class="requirement-form">
               <div class="requirement-form__header">
                 <div>
-                  <p class="eyebrow">Edicao</p>
+                  <p class="eyebrow">Edição</p>
                   <h3 id="editor-title">Selecione um requisito</h3>
                 </div>
                 <span class="badge" id="requirement-score">0/5 completo</span>
@@ -276,11 +281,11 @@
                 <input name="id" readonly />
               </label>
               <label>
-                Titulo
+                Título
                 <input name="title" placeholder="Formula curta e objetiva" />
               </label>
               <label class="requirement-form__full">
-                Descricao
+                Descrição
                 <textarea
                   name="description"
                   rows="5"
@@ -293,8 +298,8 @@
                   <option value="Funcional">Funcional</option>
                   <option value="Regra">Regra</option>
                   <option value="Dado">Dado</option>
-                  <option value="Integracao">Integracao</option>
-                  <option value="Nao funcional">Nao funcional</option>
+                  <option value="Integracao">Integração</option>
+                  <option value="Nao funcional">Não funcional</option>
                 </select>
               </label>
               <label>
@@ -306,19 +311,19 @@
                 </select>
               </label>
               <label class="requirement-form__full">
-                Criterios de aceite
+                Critérios de aceite
                 <textarea
                   name="acceptanceCriteria"
                   rows="4"
-                  placeholder="- [ ] Cenario observavel&#10;- [ ] Regra validada"
+                  placeholder="- [ ] Cenário observável&#10;- [ ] Regra validada"
                 ></textarea>
               </label>
                <label class="requirement-form__full">
-                 Observacoes
+                 Observações
                  <textarea
                    name="notes"
                    rows="3"
-                   placeholder="Dependencias, duvidas, restricoes ou excecoes"
+                   placeholder="Dependências, dúvidas, restrições ou exceções"
                  ></textarea>
                </label>
                <label class="requirement-form__full">
@@ -339,15 +344,15 @@
 
     <footer class="global-footer">
       <div class="global-footer__content">
-        <span class="global-footer__brand">Req. Codex</span>
+        <span class="global-footer__brand">REQ.</span>
         <span class="global-footer__separator">•</span>
-        <span class="global-footer__credit">Todos os direitos reservados</span>
+        <span class="global-footer__credit">Requirement intelligence workspace</span>
         <span class="global-footer__separator">•</span>
         <span class="global-footer__handle">codexmark - Mark R. Mesquita - 2026</span>
       </div>
     </footer>
 
-    <script src="../assets/js/auth.js?v=20260505a"></script>
-    <script src="../assets/js/elicitation.js?v=20260505a"></script>
+    <script src="../assets/js/auth.js?v=20260829"></script>
+    <script src="../assets/js/elicitation.js?v=20260829"></script>
   </body>
 </html>

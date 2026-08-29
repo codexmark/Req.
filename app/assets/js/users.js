@@ -24,7 +24,7 @@ async function refreshUsers() {
 
 function renderUsers() {
   if (!users.length) {
-    usersList.innerHTML = '<div class="created-card created-card--empty"><h3>Nenhum usuario cadastrado</h3><p>Crie o primeiro editor ou admin por este formulario.</p></div>';
+    usersList.innerHTML = '<div class="created-card created-card--empty"><h3>Nenhum usuário cadastrado</h3><p>Adicione a primeira pessoa para começar a distribuir ownership.</p></div>';
     return;
   }
 
@@ -63,7 +63,7 @@ async function onSubmit(event) {
   });
   const data = await response.json();
   if (!response.ok) {
-    setFeedback(data.error || 'Falha ao salvar usuario', 'error');
+    setFeedback(data.error || 'Falha ao salvar usuário', 'error');
     return;
   }
 
@@ -87,8 +87,8 @@ async function onListClick(event) {
     userForm.elements.password.value = '';
     userForm.elements.role.value = user.role;
     userForm.elements.active.value = String(Boolean(user.active));
-    userFormTitle.textContent = `Editar usuario: ${user.name}`;
-    setFeedback('Usuario carregado para edicao.', 'info');
+    userFormTitle.textContent = `Editar usuário: ${user.name}`;
+    setFeedback('Usuário carregado para edição.', 'info');
     userForm.scrollIntoView({ behavior: 'smooth' });
     return;
   }
@@ -100,7 +100,7 @@ async function onListClick(event) {
     });
     if (!response.ok) {
       const data = await response.json();
-      setFeedback(data.error || 'Falha ao excluir usuario', 'error');
+      setFeedback(data.error || 'Falha ao excluir usuário', 'error');
       return;
     }
     setFeedback('Usuario excluido.', 'info');
@@ -113,7 +113,7 @@ function resetForm() {
   userForm.elements.id.value = '';
   userForm.elements.active.value = 'true';
   userForm.elements.role.value = 'editor';
-  userFormTitle.textContent = 'Novo usuario';
+  userFormTitle.textContent = 'Adicionar usuário';
 }
 
 function setFeedback(message, kind = 'info') {

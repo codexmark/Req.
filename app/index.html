@@ -3,72 +3,81 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Req. Codex | Login</title>
+    <meta name="theme-color" content="#173f32" />
+    <meta name="description" content="Req. — da conversa ao requisito, com clareza e rastreabilidade." />
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <title>Req. | Acesso</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./assets/css/auth.css?v=20260505a" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./assets/css/auth.css?v=20260829" />
   </head>
   <body>
     <main class="auth-shell">
-      <section class="auth-panel auth-panel--hero">
-        <span class="brand-mark">R</span>
-        <p class="eyebrow">Req. Codex</p>
-        <h1>Login central para os modulos de elicitação e cards</h1>
-        <p class="auth-copy">
-          Entre com sua conta para acessar os modulos protegidos, gerenciar usuarios e definir
-          responsaveis tecnicos a partir da base centralizada.
-        </p>
-        <div class="auth-highlights">
-          <span class="auth-chip">Sessao protegida</span>
-          <span class="auth-chip">Usuarios centralizados</span>
-          <span class="auth-chip">Ownership por select</span>
+      <section class="auth-story" aria-labelledby="product-title">
+        <div class="auth-story__glow" aria-hidden="true"></div>
+        <a class="wordmark wordmark--light" href="/" aria-label="Req. página inicial">
+          <span class="wordmark__symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 5.5h8a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-8v-7Z"/><path d="m12.5 12.5 5 6"/><path d="M6.5 18.5v-13"/></svg>
+          </span>
+          <span>REQ<span class="wordmark__dot">.</span></span>
+        </a>
+
+        <div class="auth-story__content">
+          <span class="kicker">Requirement intelligence</span>
+          <h1 id="product-title">Boas entregas começam com <em>clareza.</em></h1>
+          <p>Transforme conversas dispersas em requisitos consistentes, cards acionáveis e decisões que o time inteiro consegue acompanhar.</p>
         </div>
+
+        <div class="auth-story__proof" aria-label="Benefícios da plataforma">
+          <article>
+            <span class="proof-icon" aria-hidden="true">01</span>
+            <div><strong>Capture o contexto</strong><p>Registre dores, regras e exceções sem perder o fio da conversa.</p></div>
+          </article>
+          <article>
+            <span class="proof-icon" aria-hidden="true">02</span>
+            <div><strong>Consolide decisões</strong><p>Converta entendimento em artefatos prontos para revisão.</p></div>
+          </article>
+        </div>
+        <p class="auth-story__footer">Uma fonte de verdade para produto, negócio e tecnologia.</p>
       </section>
 
-      <section class="auth-panel auth-panel--form">
-        <div id="bootstrap-banner" class="auth-banner" hidden>
-          Primeiro acesso detectado. Crie o admin inicial para liberar o sistema.
+      <section class="auth-access" aria-label="Acesso à plataforma">
+        <div class="auth-access__inner">
+          <div id="bootstrap-banner" class="auth-banner" hidden>
+            <span class="auth-banner__icon" aria-hidden="true">!</span>
+            <div><strong>Primeiro acesso</strong><span>Crie o administrador inicial para liberar o workspace.</span></div>
+          </div>
+
+          <form id="login-form" class="auth-form">
+            <header class="auth-form__header">
+              <span class="kicker kicker--dark">Bem-vindo de volta</span>
+              <h2>Acesse seu workspace</h2>
+              <p>Entre com suas credenciais para continuar.</p>
+            </header>
+            <label><span>E-mail</span><input name="email" type="email" autocomplete="email" placeholder="voce@empresa.com" required /></label>
+            <label><span>Senha</span><input name="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required /></label>
+            <p id="login-feedback" class="auth-feedback" aria-live="polite"></p>
+            <button class="button button--primary" type="submit">Entrar no Req.<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+          </form>
+
+          <form id="bootstrap-form" class="auth-form" hidden>
+            <header class="auth-form__header">
+              <span class="kicker kicker--dark">Configuração inicial</span>
+              <h2>Crie o administrador</h2>
+              <p>Esta conta terá acesso à gestão do workspace.</p>
+            </header>
+            <label><span>Nome completo</span><input name="name" autocomplete="name" placeholder="Como devemos chamar você?" required /></label>
+            <label><span>E-mail</span><input name="email" type="email" autocomplete="email" placeholder="voce@empresa.com" required /></label>
+            <label><span>Senha</span><input name="password" type="password" autocomplete="new-password" minlength="8" placeholder="Mínimo de 8 caracteres" required /></label>
+            <p id="bootstrap-feedback" class="auth-feedback" aria-live="polite"></p>
+            <button class="button button--primary" type="submit">Criar workspace</button>
+          </form>
+
+          <p class="auth-access__security"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.5 16 5v4.4c0 3.8-2.5 6.6-6 8.1-3.5-1.5-6-4.3-6-8.1V5l6-2.5Z"/><path d="m7.5 10 1.7 1.7 3.6-4"/></svg>Sessão segura e dados protegidos.</p>
         </div>
-
-        <form id="login-form" class="auth-form">
-          <p class="eyebrow">Acesso</p>
-          <h2>Entrar</h2>
-          <label>
-            Email
-            <input name="email" type="email" autocomplete="email" required />
-          </label>
-          <label>
-            Senha
-            <input name="password" type="password" autocomplete="current-password" required />
-          </label>
-          <p id="login-feedback" class="auth-feedback" aria-live="polite"></p>
-          <button class="button button--primary" type="submit">Entrar</button>
-        </form>
-
-        <form id="bootstrap-form" class="auth-form" hidden>
-          <p class="eyebrow">Bootstrap</p>
-          <h2>Criar admin inicial</h2>
-          <label>
-            Nome
-            <input name="name" required />
-          </label>
-          <label>
-            Email
-            <input name="email" type="email" required />
-          </label>
-          <label>
-            Senha
-            <input name="password" type="password" minlength="8" required />
-          </label>
-          <p id="bootstrap-feedback" class="auth-feedback" aria-live="polite"></p>
-          <button class="button button--primary" type="submit">Criar admin e entrar</button>
-        </form>
       </section>
     </main>
-    <script src="./assets/js/login.js?v=20260505a"></script>
+    <script src="./assets/js/login.js?v=20260829"></script>
   </body>
-  </html>
+</html>

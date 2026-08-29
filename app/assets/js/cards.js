@@ -160,7 +160,7 @@ function normalizeEvidenceArray(items) {
 }
 
 function renderResponsavelOptions(selectedId = '') {
-  responsavelTecnicoSelect.innerHTML = ['<option value="">Selecione um usuario</option>']
+  responsavelTecnicoSelect.innerHTML = ['<option value="">Selecione um usuário</option>']
     .concat(usersDirectory.map((user) => `<option value="${user.id}">${escapeHtml(user.name)}</option>`))
     .join('');
   responsavelTecnicoSelect.value = selectedId || '';
@@ -215,8 +215,8 @@ function renderCreatedCards() {
   if (!createdCards.length) {
     createdCardsList.innerHTML = `
       <div class="created-card created-card--empty">
-        <h3>Nenhum card criado ainda</h3>
-        <p>Preencha o formulario, monte os criterios e salve para iniciar sua fila de cards.</p>
+        <h3>Sua fila está vazia</h3>
+        <p>Preencha os detalhes da demanda e salve para criar o primeiro card.</p>
       </div>
     `;
     return;
@@ -378,7 +378,7 @@ async function clearForm(options = {}) {
   renderAcceptanceCriteria();
   renderEvidence();
   renderResponsavelOptions();
-  createCardBtn.textContent = 'Criar Card';
+  createCardBtn.textContent = 'Criar card';
 
   if (!keepFeedback) {
     setFeedback('');
@@ -477,10 +477,10 @@ async function onCardsListClick(event) {
 
     renderAcceptanceCriteria();
     renderEvidence();
-    createCardBtn.textContent = 'Salvar Edição';
+    createCardBtn.textContent = 'Salvar edição';
     setFeedback(
       hasPendingBlobMedia(card)
-        ? 'Card carregado para edicao. As evidências temporárias ainda podem ser reenviadas.'
+        ? 'Card carregado para edição. As evidências temporárias ainda podem ser reenviadas.'
         : 'Card carregado. Reanexe as evidências se quiser reenviar mídia ao Discord.',
       'info'
     );
