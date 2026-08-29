@@ -8,6 +8,8 @@ O **REQ.** é um workspace para times de produto transformarem descoberta em exe
 
 - **Elicitação** — conduza sessões, registre o contexto e identifique lacunas antes que elas virem retrabalho.
 - **Requisitos** — gere rascunhos estruturados, refine critérios de aceite e exporte em Markdown ou JSON.
+- **Requirement intelligence** — acompanhe qualidade, dependências, versões, comentários e impacto de mudanças.
+- **Rastreabilidade** — conecte evidência, requisito e Card em um fluxo auditável.
 - **Cards** — organize impacto, comportamento, regras, evidências e ownership em uma demanda pronta para execução.
 - **Usuários** — gerencie administradores e editores em uma base centralizada.
 - **Integrações** — sincronize cards com Discord e armazene evidências temporárias no Vercel Blob.
@@ -19,6 +21,8 @@ A interface foi desenhada como um produto SaaS responsivo e acessível:
 - navegação lateral no desktop e menu compacto no mobile;
 - hierarquia visual orientada pelas etapas do trabalho;
 - estados de foco, feedback e autosave visíveis;
+- sincronização do workspace com fallback local quando o serviço estiver indisponível;
+- revisão colaborativa no contexto de cada requisito;
 - formulários com leitura confortável e alvos de toque adequados;
 - identidade visual própria em verde floresta e lima;
 - layout testado em desktop e em viewport mobile de 390 px.
@@ -59,6 +63,7 @@ api/
 ├── auth/           # sessão, login, logout e bootstrap
 ├── blob/           # upload e limpeza de evidências
 ├── users/          # CRUD de usuários
+├── workspace.js    # persistência compartilhada e revisão otimista
 └── webhook.js      # integração com Discord
 ```
 
