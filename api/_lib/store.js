@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { getRedis } from "./redis.js";
 
 const USERS_KEY = "reqcodex:users";
+const WORKSPACE_KEY = "reqcodex:workspace:shared";
 const SESSION_PREFIX = "reqcodex:session:";
 const SESSION_COOKIE = "reqcodex_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
@@ -41,6 +42,27 @@ export async function getUsers() {
 export async function saveUsers(users) {
   const redis = await getRedis();
   await redis.set(USERS_KEY, JSON.stringify(users));
+}
+
+export async function getSharedWorkspace() {
+  const redis = await getRedis();
+  const raw = await redis.get(WORKSPACE_KEY);
+  if (!raw) return { revision: 0, activeSessionId: null, sessions: [], activity: [] };
+  const workspace = typeof raw === "string" ? JSON.parse(raw) : raw;
+  return {
+    revision: Number(workspace.revision) || 0,
+    activeSessionId: workspace.activeSessionId || null,
+    sessions: Array.isArray(workspace.sessions) ? workspace.sessions : [],
+    activity: Array.isArray(workspace.activity) ? workspace.activity : [],
+    updatedAt: workspace.updatedAt || null,
+    updatedBy: workspace.updatedBy || null,
+  };
+}
+
+export async function saveSharedWorkspace(workspace) {
+  const redis = await getRedis();
+  await redis.set(WORKSPACE_KEY, JSON.stringify(workspace));
+  return workspace;
 }
 
 export async function findUserByEmail(email) {
