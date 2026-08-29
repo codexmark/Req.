@@ -4,355 +4,214 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#173f32" />
-    <meta name="description" content="Conduza sessões de descoberta e transforme contexto em requisitos rastreáveis." />
+    <meta name="description" content="Conduza levantamentos guiados e transforme conversas em requisitos rastreáveis." />
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
-    <title>Req. | Elicitação</title>
+    <title>Req. | Levantamento de requisitos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../assets/css/app.css?v=20260829" />
-    <link rel="stylesheet" href="../assets/css/elicitation.css?v=20260829" />
+    <link rel="stylesheet" href="../assets/css/elicitation.css?v=20260829b" />
   </head>
   <body>
     <header class="global-nav">
       <div class="global-nav__topbar">
         <div class="global-nav__brand-wrap">
-          <button
-            class="nav-toggle"
-            type="button"
-            data-nav-toggle
-            aria-expanded="false"
-            aria-controls="global-nav-drawer"
-            aria-label="Abrir menu"
-          >
-            <span></span>
-            <span></span>
-            <span></span>
+          <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="global-nav-drawer" aria-label="Abrir menu">
+            <span></span><span></span><span></span>
           </button>
           <div class="global-nav__brand">
             <span class="brand-mark small">R.</span>
-            <div>
-              <span class="global-nav__title">REQ.</span>
-              <span class="global-nav__subtitle">Requirement workspace</span>
-            </div>
+            <div><span class="global-nav__title">REQ.</span><span class="global-nav__subtitle">Requirement workspace</span></div>
           </div>
         </div>
-        <div class="global-nav__actions">
-          <button class="button button--ghost button--nav" type="button" data-logout>Sair</button>
-        </div>
+        <div class="global-nav__actions"><button class="button button--ghost button--nav" type="button" data-logout>Sair</button></div>
       </div>
       <div id="global-nav-drawer" class="global-nav__drawer" data-nav-drawer hidden>
-        <nav class="global-nav__links" aria-label="Navegacao principal">
-          <a class="is-active" href="../elicitation" aria-current="page">Elicitação</a>
+        <nav class="global-nav__links" aria-label="Navegação principal">
+          <a class="is-active" href="../elicitation" aria-current="page">Levantamentos</a>
           <a href="../cards">Cards</a>
           <a data-admin-only href="../users">Usuários</a>
         </nav>
         <div class="global-nav__local">
-          <span class="global-nav__local-title">Nesta página</span>
-          <a href="#understanding">Entendimento</a>
-          <a href="#requirements">Requisitos</a>
+          <span class="global-nav__local-title">Neste fluxo</span>
+          <a href="#journey">Preparar</a><a href="#journey">Conversar</a><a href="#journey">Revisar</a><a href="#journey">Entregar</a>
         </div>
       </div>
     </header>
 
     <div class="app-shell">
       <main class="main-content workspace">
-        <header class="hero surface-card">
-          <div class="hero__content">
-            <div class="hero__brand">
-              <span class="brand-mark">R.</span>
-              <div class="hero__copyblock">
-                <p class="eyebrow">Discovery workspace</p>
-                <h1>Da conversa ao requisito.</h1>
-                <p class="hero__copy">
-                  Capture contexto, identifique lacunas e consolide decisões em requisitos prontos para o time.
-                </p>
-              </div>
-            </div>
+        <header class="workspace-header">
+          <div>
+            <p class="eyebrow">Discovery workspace</p>
+            <h1 id="workspace-title">Levantamentos</h1>
+            <p id="workspace-description">Transforme conversas em decisões claras e cards prontos para execução.</p>
           </div>
-          <div class="hero__actions">
-            <span id="autosave-indicator" class="badge badge--live">Salvando sessão</span>
-            <a class="button button--ghost" href="../cards">Abrir cards</a>
-            <button id="focus-toggle" class="button button--ghost" type="button">Modo foco</button>
-            <button id="reset-session" class="button button--danger" type="button">Limpar sessão</button>
+          <div class="workspace-header__actions">
+            <span id="autosave-indicator" class="save-state" hidden><span></span>Salvo</span>
+            <button id="go-home" class="button button--ghost" type="button" hidden>Meus levantamentos</button>
+            <button id="new-session" class="button button--primary" type="button">Novo levantamento</button>
           </div>
         </header>
 
-        <section class="panel panel--intro">
-          <div class="panel__heading">
-            <div>
-              <p class="eyebrow">Visão geral</p>
-              <h2>Progresso da sessão</h2>
+        <section id="home-view" class="home-view">
+          <article class="welcome-card">
+            <div class="welcome-card__content">
+              <span class="welcome-card__label">Um fluxo que conduz você</span>
+              <h2>Entenda primeiro.<br />Especifique depois.</h2>
+              <p>O Req. ajuda a preparar a conversa, descobrir lacunas, confirmar o entendimento e só então criar requisitos.</p>
+              <button id="home-new-session" class="button button--lime" type="button">Começar levantamento <span aria-hidden="true">→</span></button>
             </div>
-            <span class="badge" id="session-health">0 requisitos gerados</span>
-          </div>
+            <ol class="welcome-card__journey" aria-label="Etapas do levantamento">
+              <li><span>01</span><div><strong>Prepare</strong><p>Defina objetivo e participantes.</p></div></li>
+              <li><span>02</span><div><strong>Converse</strong><p>Responda uma pergunta por vez.</p></div></li>
+              <li><span>03</span><div><strong>Confirme</strong><p>Revise fatos, regras e lacunas.</p></div></li>
+              <li><span>04</span><div><strong>Entregue</strong><p>Aprove e envie para Cards.</p></div></li>
+            </ol>
+          </article>
 
-          <div class="metric-strip">
-            <article class="metric-card">
-              <span class="metric-card__label">Captura</span>
-              <strong id="capture-metric">0 chars</strong>
-              <p>Volume de contexto registrado nesta sessão.</p>
-            </article>
-            <article class="metric-card">
-              <span class="metric-card__label">Lacunas</span>
-              <strong id="gap-metric">0</strong>
-              <p>Pontos que ainda pedem uma pergunta complementar.</p>
-            </article>
-            <article class="metric-card">
-              <span class="metric-card__label">Prontos para revisar</span>
-              <strong id="draft-metric">0</strong>
-              <p>Rascunhos gerados e prontos para refinamento.</p>
-            </article>
+          <div class="recent-heading">
+            <div><p class="eyebrow">Seu trabalho</p><h2>Levantamentos recentes</h2></div>
+            <span id="session-total" class="muted-count">0 levantamentos</span>
           </div>
+          <div id="sessions-list" class="sessions-list"></div>
         </section>
 
-        <section class="panel" id="understanding">
-          <div class="panel__heading">
-            <div>
-              <p class="eyebrow">Contexto</p>
-              <h2>Informações da sessão</h2>
-            </div>
-          </div>
+        <section id="journey" class="journey" hidden>
+          <nav id="journey-progress" class="journey-progress" aria-label="Progresso do levantamento">
+            <button type="button" data-step-target="setup"><span>1</span><strong>Preparar</strong></button>
+            <button type="button" data-step-target="interview"><span>2</span><strong>Conversar</strong></button>
+            <button type="button" data-step-target="synthesis"><span>3</span><strong>Revisar</strong></button>
+            <button type="button" data-step-target="requirements"><span>4</span><strong>Requisitos</strong></button>
+            <button type="button" data-step-target="delivery"><span>5</span><strong>Entregar</strong></button>
+          </nav>
 
-          <form id="session-form" class="session-grid">
-            <label>
-              Projeto
-              <input name="projectName" placeholder="Ex.: Ferias, CRM, Fiscal" />
-            </label>
-            <label>
-              Área ou cliente
-              <input name="client" placeholder="Ex.: RH corporativo" />
-            </label>
-            <label>
-              Facilitador
-              <input name="facilitator" placeholder="Seu nome" />
-            </label>
-            <label>
-              Data
-              <input name="sessionDate" type="date" />
-            </label>
-            <label class="session-grid__full">
-              Objetivo da conversa
-              <input
-                name="primaryGoal"
-                placeholder="Qual decisão ou entendimento precisamos obter nesta conversa?"
-              />
-            </label>
-          </form>
-        </section>
-
-        <section class="panel panel--capture">
-          <div class="panel__heading">
-            <div>
-              <p class="eyebrow">Etapa 01</p>
-              <h2>Capture a conversa</h2>
-            </div>
-            <button id="organize-button" class="button button--primary" type="button">
-              Organizar entendimento
-            </button>
-          </div>
-
-          <div class="capture-layout">
-            <div class="capture-area">
-              <label class="stacked-label" for="raw-notes">
-                Notas da sessão
-                <textarea
-                  id="raw-notes"
-                  rows="12"
-                  placeholder="Registre a conversa como ela aconteceu: dores, exemplos, exceções, pedidos, riscos, metas e retrabalho..."
-                ></textarea>
-              </label>
-              <div class="quick-prompts">
-                <span class="quick-prompts__label">Perguntas para destravar</span>
-                <button class="prompt-chip" type="button" data-prompt="Qual problema acontece hoje e qual impacto isso gera?">
-                  Problema atual
-                </button>
-                <button class="prompt-chip" type="button" data-prompt="Quem usa, aprova, opera ou sofre com esse processo?">
-                  Atores
-                </button>
-                <button class="prompt-chip" type="button" data-prompt="Qual regra nunca pode ser quebrada?">
-                  Regra crítica
-                </button>
-                <button class="prompt-chip" type="button" data-prompt="O que seria sucesso visivel para essa entrega?">
-                  Critério de sucesso
-                </button>
-                <button class="prompt-chip" type="button" data-prompt="Qual excecao costuma gerar retrabalho ou duvida?">
-                  Exceções
-                </button>
-              </div>
+          <div id="step-setup" class="step-panel" data-step-panel="setup">
+            <div class="step-heading">
+              <div><span class="step-caption">Etapa 1 de 5</span><h2>Como você quer começar?</h2><p>Escolha o caminho que combina com o material que você já tem.</p></div>
             </div>
 
-            <aside class="capture-aside">
-              <div class="note-card">
-                <h3>Como usar</h3>
-                <ol>
-                  <li>Escreva a conversa em linguagem natural.</li>
-                  <li>Clique em organizar para quebrar o entendimento.</li>
-                  <li>Revise os blocos e gere os requisitos.</li>
-                </ol>
-              </div>
-              <div class="note-card">
-                <h3>Lacunas identificadas</h3>
-                <ul id="gap-list" class="bullet-list"></ul>
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel__heading">
-            <div>
-              <p class="eyebrow">Etapa 02</p>
-              <h2>Consolide o entendimento</h2>
-            </div>
-            <button id="generate-requirements" class="button button--secondary" type="button">
-              Gerar requisitos
-            </button>
-          </div>
-
-          <div class="understanding-grid">
-            <label class="stacked-label">
-              Objetivo de negócio
-              <textarea id="summary-objective" rows="4"></textarea>
-            </label>
-            <label class="stacked-label">
-              Problema atual
-              <textarea id="summary-problem" rows="4"></textarea>
-            </label>
-            <label class="stacked-label">
-              Atores e áreas
-              <textarea id="summary-actors" rows="4"></textarea>
-            </label>
-            <label class="stacked-label">
-              Regras e restrições
-              <textarea id="summary-rules" rows="4"></textarea>
-            </label>
-            <label class="stacked-label">
-              Comportamentos esperados
-              <textarea id="summary-behaviors" rows="5"></textarea>
-            </label>
-            <label class="stacked-label">
-              Exceções e riscos
-              <textarea id="summary-exceptions" rows="5"></textarea>
-            </label>
-            <label class="stacked-label understanding-grid__full">
-              Perguntas em aberto
-              <textarea id="summary-questions" rows="4"></textarea>
-            </label>
-          </div>
-        </section>
-
-        <section class="panel panel--requirements" id="requirements">
-          <div class="panel__heading">
-            <div>
-              <p class="eyebrow">Etapa 03</p>
-              <h2>Refine e exporte requisitos</h2>
-            </div>
-            <div class="panel__actions">
-              <button id="add-requirement" class="button button--ghost" type="button">Novo requisito</button>
-              <button id="export-markdown" class="button button--secondary" type="button">Exportar Markdown</button>
-              <button id="export-json" class="button button--ghost" type="button">Exportar JSON</button>
-            </div>
-          </div>
-
-          <div class="requirements-layout">
-            <div class="requirements-list-card">
-              <div class="requirements-list-card__header">
-                <h3>Fila de revisão</h3>
-                <span class="badge" id="requirement-count">0 itens</span>
-              </div>
-              <ul id="requirements-list" class="requirements-list"></ul>
+            <div class="method-grid" role="radiogroup" aria-label="Método do levantamento">
+              <label class="method-card is-selected">
+                <input type="radio" name="entryMode" value="guided" checked />
+                <span class="method-card__icon">?</span><span class="method-card__tag">Recomendado</span>
+                <strong>Entrevista guiada</strong><p>O Req. conduz a conversa com uma pergunta por vez.</p>
+              </label>
+              <label class="method-card">
+                <input type="radio" name="entryMode" value="import" />
+                <span class="method-card__icon">↥</span>
+                <strong>Importar notas</strong><p>Cole uma ata ou anotações de uma conversa que já aconteceu.</p>
+              </label>
+              <label class="method-card">
+                <input type="radio" name="entryMode" value="manual" />
+                <span class="method-card__icon">✦</span>
+                <strong>Modo manual</strong><p>Vá direto à síntese quando já souber exatamente o que registrar.</p>
+              </label>
             </div>
 
-            <form id="requirement-form" class="requirement-form">
-              <div class="requirement-form__header">
-                <div>
-                  <p class="eyebrow">Edição</p>
-                  <h3 id="editor-title">Selecione um requisito</h3>
-                </div>
-                <span class="badge" id="requirement-score">0/5 completo</span>
-              </div>
-
-              <label>
-                ID
-                <input name="id" readonly />
-              </label>
-              <label>
-                Título
-                <input name="title" placeholder="Formula curta e objetiva" />
-              </label>
-              <label class="requirement-form__full">
-                Descrição
-                <textarea
-                  name="description"
-                  rows="5"
-                  placeholder="O sistema deve..."
-                ></textarea>
-              </label>
-              <label>
-                Tipo
-                <select name="type">
-                  <option value="Funcional">Funcional</option>
-                  <option value="Regra">Regra</option>
-                  <option value="Dado">Dado</option>
-                  <option value="Integracao">Integração</option>
-                  <option value="Nao funcional">Não funcional</option>
-                </select>
-              </label>
-              <label>
-                Prioridade
-                <select name="priority">
-                  <option value="Must">Must</option>
-                  <option value="Should">Should</option>
-                  <option value="Could">Could</option>
-                </select>
-              </label>
-              <label class="requirement-form__full">
-                Critérios de aceite
-                <textarea
-                  name="acceptanceCriteria"
-                  rows="4"
-                  placeholder="- [ ] Cenário observável&#10;- [ ] Regra validada"
-                ></textarea>
-              </label>
-               <label class="requirement-form__full">
-                 Observações
-                 <textarea
-                   name="notes"
-                   rows="3"
-                   placeholder="Dependências, dúvidas, restrições ou exceções"
-                 ></textarea>
-               </label>
-               <label class="requirement-form__full">
-                  Responsável técnico
-                  <select name="responsavelTecnicoId"></select>
-                </label>
-
-              <div class="requirement-form__actions">
-                <button id="save-requirement" class="button button--primary" type="submit">Salvar</button>
-                <button id="duplicate-requirement" class="button button--ghost" type="button">Duplicar</button>
-                <button id="delete-requirement" class="button button--danger" type="button">Excluir</button>
-              </div>
+            <form id="setup-form" class="setup-form">
+              <div class="form-section-heading"><span>Contexto essencial</span><p>Essas respostas ajudam o Req. a manter a conversa no foco.</p></div>
+              <label class="field-large">O que precisamos entender ou decidir?<textarea name="primaryGoal" rows="3" placeholder="Ex.: Entender por que a aprovação de férias gera retrabalho" required></textarea></label>
+              <label>Projeto ou iniciativa<input name="projectName" placeholder="Ex.: Novo fluxo de férias" required /></label>
+              <label>Com quem vamos conversar?<input name="stakeholder" placeholder="Ex.: Analista de RH" /></label>
+              <label>Área ou cliente<input name="client" placeholder="Ex.: RH corporativo" /></label>
+              <label>Facilitador<input name="facilitator" placeholder="Seu nome" /></label>
+              <label id="import-notes-field" class="field-large" hidden>Notas ou ata da conversa<textarea name="importNotes" rows="8" placeholder="Cole aqui o conteúdo da reunião, entrevista ou documento..."></textarea></label>
+              <div class="step-actions field-large"><button id="cancel-setup" class="button button--ghost" type="button">Cancelar</button><button id="start-session" class="button button--primary" type="submit">Começar conversa <span aria-hidden="true">→</span></button></div>
             </form>
+          </div>
+
+          <div id="step-interview" class="step-panel" data-step-panel="interview" hidden>
+            <div class="interview-layout">
+              <section class="question-stage">
+                <div class="question-progress"><span id="question-counter">Pergunta 1 de 7</span><div class="question-progress__track"><span id="question-progress-bar"></span></div></div>
+                <div class="question-card">
+                  <span id="question-topic" class="question-topic">Processo atual</span>
+                  <h2 id="question-title">Conte como isso acontece hoje, do começo ao fim.</h2>
+                  <p id="question-helper">Não precisa organizar a resposta. Registre a situação como ela realmente acontece.</p>
+                  <label class="sr-only" for="question-answer">Sua resposta</label>
+                  <textarea id="question-answer" rows="9" placeholder="Escreva aqui o que ouviu na conversa..."></textarea>
+                  <div id="answer-signal" class="answer-signal" aria-live="polite">Responda com suas palavras. Você poderá revisar tudo depois.</div>
+                </div>
+                <div class="step-actions question-actions">
+                  <button id="previous-question" class="button button--ghost" type="button">← Voltar</button>
+                  <button id="skip-question" class="button button--ghost" type="button">Não sei ainda</button>
+                  <button id="next-question" class="button button--primary" type="button">Continuar <span aria-hidden="true">→</span></button>
+                </div>
+              </section>
+
+              <aside class="interview-context">
+                <div class="context-head"><div><span class="eyebrow">Em construção</span><h3>O que já entendemos</h3></div><span id="answers-count" class="context-count">0/7</span></div>
+                <div id="captured-topics" class="captured-topics"></div>
+                <button id="finish-interview-early" class="button button--ghost button--block" type="button">Revisar entendimento agora</button>
+              </aside>
+            </div>
+          </div>
+
+          <div id="step-synthesis" class="step-panel" data-step-panel="synthesis" hidden>
+            <div class="step-heading step-heading--split">
+              <div><span class="step-caption">Etapa 3 de 5</span><h2>Foi isso que entendemos?</h2><p>Confirme os achados antes que eles se transformem em requisitos.</p></div>
+              <span id="synthesis-status" class="review-status">0 de 7 revisados</span>
+            </div>
+            <article class="understanding-summary"><span class="eyebrow">Síntese da conversa</span><p id="synthesis-narrative"></p></article>
+            <div id="findings-list" class="findings-list"></div>
+            <div class="step-actions"><button id="back-to-interview" class="button button--ghost" type="button">← Voltar à conversa</button><button id="generate-drafts" class="button button--primary" type="button">Confirmar e criar rascunhos <span aria-hidden="true">→</span></button></div>
+          </div>
+
+          <div id="step-requirements" class="step-panel" data-step-panel="requirements" hidden>
+            <div class="step-heading step-heading--split">
+              <div><span class="step-caption">Etapa 4 de 5</span><h2>Revise os requisitos</h2><p>Aprove, ajuste ou descarte cada rascunho. Nada é enviado sem sua confirmação.</p></div>
+              <div class="review-summary"><strong id="approved-count">0 aprovados</strong><span id="pending-count">0 para revisar</span></div>
+            </div>
+
+            <div class="requirements-workbench">
+              <aside class="requirement-queue">
+                <div class="queue-head"><h3>Rascunhos</h3><button id="add-requirement" class="icon-action" type="button" aria-label="Adicionar requisito">+</button></div>
+                <div id="requirements-list" class="requirements-list"></div>
+              </aside>
+
+              <form id="requirement-form" class="requirement-review">
+                <div id="requirement-empty" class="requirement-empty"><span>✦</span><h3>Nenhum requisito selecionado</h3><p>Crie um requisito ou volte à revisão do entendimento.</p></div>
+                <div id="requirement-editor" hidden>
+                  <div class="requirement-review__head"><div><span id="requirement-id" class="requirement-id">REQ-001</span><span id="requirement-state" class="state-badge">Para revisar</span></div><button id="delete-requirement" class="text-action text-action--danger" type="button">Descartar</button></div>
+                  <label>Título<input name="title" placeholder="Uma ação curta e objetiva" /></label>
+                  <label>Comportamento esperado<textarea name="description" rows="4" placeholder="O sistema deve..."></textarea></label>
+                  <div class="two-fields"><label>Tipo<select name="type"><option>Funcional</option><option>Regra</option><option>Dado</option><option>Integração</option><option>Não funcional</option></select></label><label>Prioridade<select name="priority"><option>Must</option><option>Should</option><option>Could</option></select></label></div>
+                  <label>Critérios de aceite<textarea name="acceptanceCriteria" rows="5" placeholder="Dado que...&#10;Quando...&#10;Então..."></textarea></label>
+                  <label>Responsável técnico<select name="responsavelTecnicoId"></select></label>
+                  <label>Observações<textarea name="notes" rows="3" placeholder="Dependências, decisões ou restrições"></textarea></label>
+
+                  <article class="source-card"><div><span class="eyebrow">Evidência de origem</span><p id="requirement-source"></p></div><button id="return-to-source" class="text-action" type="button">Ver resposta</button></article>
+                  <article class="quality-card"><div class="quality-card__head"><div><span class="eyebrow">Revisão de qualidade</span><h3 id="quality-title">Verifique antes de aprovar</h3></div><span id="quality-score">0/5</span></div><ul id="quality-list"></ul></article>
+                  <div class="requirement-actions"><button id="save-requirement" class="button button--secondary" type="submit">Salvar alterações</button><button id="reject-requirement" class="button button--ghost" type="button">Rejeitar</button><button id="approve-requirement" class="button button--primary" type="button">Aprovar requisito ✓</button></div>
+                </div>
+              </form>
+            </div>
+            <div class="step-actions"><button id="back-to-synthesis" class="button button--ghost" type="button">← Revisar entendimento</button><button id="go-to-delivery" class="button button--primary" type="button">Preparar entrega <span aria-hidden="true">→</span></button></div>
+          </div>
+
+          <div id="step-delivery" class="step-panel" data-step-panel="delivery" hidden>
+            <div class="delivery-hero">
+              <span class="delivery-hero__icon">✓</span><span class="step-caption">Etapa 5 de 5</span>
+              <h2>Levantamento pronto para seguir.</h2>
+              <p id="delivery-message">Revise o resumo e escolha como entregar o resultado ao time.</p>
+              <div class="delivery-stats"><div><strong id="delivery-approved">0</strong><span>requisitos aprovados</span></div><div><strong id="delivery-questions">0</strong><span>perguntas abertas</span></div><div><strong id="delivery-cards">0</strong><span>cards preparados</span></div></div>
+            </div>
+            <section class="delivery-actions">
+              <article class="delivery-primary"><span class="eyebrow">Próximo passo recomendado</span><h3>Levar os requisitos para execução</h3><p>Crie cards estruturados a partir dos requisitos aprovados e continue o refinamento com o time.</p><button id="send-to-cards" class="button button--lime" type="button">Criar cards aprovados <span aria-hidden="true">→</span></button></article>
+              <div class="delivery-secondary"><button id="export-markdown" class="delivery-option" type="button"><span>MD</span><div><strong>Exportar Markdown</strong><p>Documento legível para compartilhar.</p></div></button><button id="export-json" class="delivery-option" type="button"><span>{ }</span><div><strong>Exportar JSON</strong><p>Dados estruturados da sessão.</p></div></button></div>
+            </section>
+            <div class="step-actions"><button id="back-to-requirements" class="button button--ghost" type="button">← Voltar aos requisitos</button><button id="finish-session" class="button button--secondary" type="button">Concluir levantamento</button></div>
           </div>
         </section>
       </main>
     </div>
 
-    <footer class="global-footer">
-      <div class="global-footer__content">
-        <span class="global-footer__brand">REQ.</span>
-        <span class="global-footer__separator">•</span>
-        <span class="global-footer__credit">Requirement intelligence workspace</span>
-        <span class="global-footer__separator">•</span>
-        <span class="global-footer__handle">codexmark - Mark R. Mesquita - 2026</span>
-      </div>
-    </footer>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <footer class="global-footer"><div class="global-footer__content"><span class="global-footer__brand">REQ.</span><span class="global-footer__separator">•</span><span class="global-footer__credit">Requirement intelligence workspace</span><span class="global-footer__separator">•</span><span class="global-footer__handle">codexmark — 2026</span></div></footer>
 
     <script src="../assets/js/auth.js?v=20260829"></script>
-    <script src="../assets/js/elicitation.js?v=20260829"></script>
+    <script src="../assets/js/elicitation.js?v=20260829b"></script>
   </body>
 </html>
