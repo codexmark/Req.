@@ -4,7 +4,22 @@ const bootstrapBanner = document.getElementById('bootstrap-banner');
 const loginFeedback = document.getElementById('login-feedback');
 const bootstrapFeedback = document.getElementById('bootstrap-feedback');
 
+// Os handlers entram antes de qualquer requisicao: se o usuario enviar o
+// formulario enquanto a sessao ainda esta sendo verificada (ou se a
+// verificacao falhar), o browser nao pode cair no envio nativo.
+loginForm.addEventListener('submit', onLogin);
+bootstrapForm.addEventListener('submit', onBootstrap);
+scrubCredentialsFromUrl();
+
 boot();
+
+function scrubCredentialsFromUrl() {
+  // Versoes antigas da pagina chegaram a enviar o formulario por GET; limpa a
+  // barra de endereco caso alguem ainda carregue uma URL assim.
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('password') && !params.has('email')) return;
+  window.history.replaceState(null, '', window.location.pathname);
+}
 
 async function parseResponse(response) {
   const text = await response.text();
@@ -33,9 +48,6 @@ async function boot() {
   const bootstrapRequired = Boolean(session.bootstrapRequired);
   bootstrapBanner.hidden = !bootstrapRequired;
   bootstrapForm.hidden = !bootstrapRequired;
-
-  loginForm.addEventListener('submit', onLogin);
-  bootstrapForm.addEventListener('submit', onBootstrap);
 }
 
 async function onLogin(event) {

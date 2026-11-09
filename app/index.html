@@ -49,7 +49,7 @@
             <div><strong>Primeiro acesso</strong><span>Crie o administrador inicial para liberar o workspace.</span></div>
           </div>
 
-          <form id="login-form" class="auth-form">
+          <form id="login-form" class="auth-form" method="post" action="/api/auth/login">
             <header class="auth-form__header">
               <span class="kicker kicker--dark">Bem-vindo de volta</span>
               <h2>Acesse seu workspace</h2>
@@ -61,7 +61,7 @@
             <button class="button button--primary" type="submit">Entrar no Req.<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
           </form>
 
-          <form id="bootstrap-form" class="auth-form" hidden>
+          <form id="bootstrap-form" class="auth-form" method="post" action="/api/auth/bootstrap" hidden>
             <header class="auth-form__header">
               <span class="kicker kicker--dark">Configuração inicial</span>
               <h2>Crie o administrador</h2>
@@ -78,6 +78,6 @@
         </div>
       </section>
     </main>
-    <script src="./assets/js/login.js?v=20260829"></script>
+    <script src="./assets/js/login.js?v=20261109"></script>
   </body>
 </html>
