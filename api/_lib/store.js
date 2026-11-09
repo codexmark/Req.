@@ -128,7 +128,11 @@ export async function createSession(user) {
     createdAt: new Date().toISOString(),
   };
 
-  await redis.set(`${SESSION_PREFIX}${token}`, JSON.stringify(session), { EX: SESSION_TTL_SECONDS });
+  // node-redis le `EX`; o SDK REST da Upstash le `ex`. Os dois ignoram a chave que nao conhecem.
+  await redis.set(`${SESSION_PREFIX}${token}`, JSON.stringify(session), {
+    EX: SESSION_TTL_SECONDS,
+    ex: SESSION_TTL_SECONDS,
+  });
   return { token, session };
 }
 
